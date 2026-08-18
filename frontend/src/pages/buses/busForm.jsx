@@ -31,7 +31,7 @@ export default function BusForm({
     <>
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
         <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
-          <div className="bg-[#19193E] text-white px-6 py-4 flex justify-between items-center shrink-0">
+          <div className="bg-[#4d7c65] text-white px-6 py-4 flex justify-between items-center shrink-0">
             <h3 className="font-bold text-sm uppercase tracking-wide">
               {!isEdit ? "Nouveau : Bus" : "Modification : Bus"}
             </h3>
@@ -61,7 +61,7 @@ export default function BusForm({
                   onChange={(e) =>
                     setBusForm({ ...busForm, registration: e.target.value })
                   }
-                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none"
+                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none focus:bg-white border border-transparent focus:border-[#4d7c65] transition-all"
                   placeholder="Ex: Scania V8"
                 />
               </div>
@@ -76,7 +76,7 @@ export default function BusForm({
                   onChange={(e) =>
                     setBusForm({ ...busForm, modele: e.target.value })
                   }
-                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none"
+                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none focus:bg-white border border-transparent focus:border-[#4d7c65] transition-all"
                   placeholder="Ex: Scania V8"
                 />
               </div>
@@ -94,7 +94,7 @@ export default function BusForm({
                   onChange={(e) =>
                     setBusForm({ ...busForm, capacity: e.target.value })
                   }
-                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none"
+                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none focus:bg-white border border-transparent focus:border-[#4d7c65] transition-all"
                   placeholder="Places"
                 />
               </div>
@@ -107,7 +107,7 @@ export default function BusForm({
                   onChange={(e) =>
                     setBusForm({ ...busForm, status_bus: e.target.value })
                   }
-                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none"
+                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none focus:bg-white border border-transparent focus:border-[#4d7c65] transition-all"
                 >
                   <option value="" disabled>
                     -- Sélectionner --
@@ -142,7 +142,7 @@ export default function BusForm({
                     Aucun chauffeur assigné (Cliquer pour choisir)
                   </span>
                 )}
-                <span className="text-xs text-[#3B3B98] font-bold">
+                <span className="text-xs text-[#4d7c65] font-bold">
                   {busForm.driver ? "Changer" : "Assigner"}
                 </span>
               </div>
@@ -175,7 +175,7 @@ export default function BusForm({
                 ) : (
                   <div className="space-y-1 text-center cursor-pointer">
                     <Upload className="mx-auto h-8 w-8 text-gray-400" />
-                    <span className="text-xs font-semibold text-[#3B3B98]">
+                    <span className="text-xs font-semibold text-[#4d7c65]">
                       Importer un fichier
                     </span>
                     <input

@@ -2,7 +2,7 @@ import QRCode from "react-qr-code";
 
 export default function TicketCard({ ticket }) {
   return (
-    <div className="w-[320px] h-[110px] border-2 border-dashed border-slate-400 rounded-lg p-4 flex justify-between items-center bg-white">
+    <div className="w-[320px] h-27.5 border-2 border-dashed border-slate-400 rounded-lg p-4 flex justify-between items-center bg-white">
       <div className="flex-1">
         <h3 className="text-[10px] font-bold tracking-widest">TICKET VOYAGE</h3>
 

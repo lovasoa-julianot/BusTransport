@@ -13,11 +13,18 @@ import {
 import { AreaChart } from "recharts";
 import api from "../hooks/api";
 
+const amountFormat = (amount) => {
+  return new Intl.NumberFormat("fr-FR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+};
+
 export default function DashboardContent({ search = "" }) {
   const [timeFilter, setTimeFilter] = useState("month");
-  const [selectedBusFilter, setSelectedBusFilter] = useState("all");
-  const [amountTotal, setAmountTotal] = useState(null);
-  const [amountTotalBus, setAmountTotalBus] = useState(null);
+  const [selectedBusFilter, setSelectedBusFilter] = useState("");
+  const [amountTotal, setAmountTotal] = useState("");
+  const [amountTotalBus, setAmountTotalBus] = useState("");
 
   const [workingbus, setWorkingBus] = useState([]);
 
@@ -50,24 +57,29 @@ export default function DashboardContent({ search = "" }) {
     }
   };
 
-  const getAmountTotal = async () => {
+  const getAmountTotal = async (mode) => {
     try {
-      const response = await api.get("/income");
-      const sum = response.data.data._sum;
-      setAmountTotal(sum.amount);
+      const response = await api.get(`/income/${mode}`);
+      const sum = response.data.data.amount;
+      setAmountTotal(sum);
     } catch (error) {
-      console.error("Erreur lors de la récupération des arrêts :", error);
+      console.error(
+        "Erreur lors de la récupération des revenues :",
+        error.message,
+      );
     }
   };
 
-  const filterAmountByBus = async () => {
-    console.log(selectedBusFilter);
+  const filterAmountByBus = async (id) => {
     try {
-      const response = await api.get("/income/", selectedBusFilter);
-      const sum = response.data.data._sum;
-      setAmountTotalBus(sum.amount);
+      const response = await api.get(`/income/${id}`);
+      const sum = response.data.data.amount;
+      setAmountTotalBus(sum);
     } catch (error) {
-      console.error("Erreur lors de la récupération des arrêts :", error);
+      console.error(
+        "Erreur lors de la récupération des revenues :",
+        error.message,
+      );
     }
   };
 
@@ -77,12 +89,15 @@ export default function DashboardContent({ search = "" }) {
 
   useEffect(() => {
     getActiveBuses();
-    getAmountTotal();
   }, []);
 
   useEffect(() => {
-    filterAmountByBus();
+    filterAmountByBus(selectedBusFilter);
   }, [selectedBusFilter]);
+
+  useEffect(() => {
+    getAmountTotal(timeFilter);
+  }, [timeFilter]);
 
   const totalRevenueCompany = "33,800,000 Ar";
 
@@ -139,7 +154,7 @@ export default function DashboardContent({ search = "" }) {
                   Recette Totale
                 </p>
                 <p className="text-2xl font-black text-gray-800 mt-2">
-                  {amountTotal || "0,00"} Ar
+                  {amountFormat(amountTotal) || "0,00"} MGA
                 </p>
               </div>
               <div className="text-[#5E0006] bg-indigo-50 p-3 rounded-full">
@@ -153,7 +168,7 @@ export default function DashboardContent({ search = "" }) {
                   Recette Filtrée ({timeFilter === "day" ? "Jour" : "Mois"})
                 </p>
                 <p className="text-2xl font-black text-[#FFC107] mt-2">
-                  {amountTotalBus || "0,00"} Ar
+                  {amountFormat(amountTotalBus) || "0,00"} MGA
                 </p>
               </div>
               <div className="text-white bg-white/10 p-3 rounded-full">

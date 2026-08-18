@@ -31,17 +31,13 @@ export default function DriverForm({
   setIsEdit,
   setIsModalOpen,
 }) {
-  // useEffect(() => {
-  //   console.log(isEdit ? " Modification " : "Enregsitrement");
-  // }, [isEdit]);
-
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setDriverForm({
         ...driverForm,
         photo: URL.createObjectURL(file),
-        photoFile: file, 
+        photoFile: file,
       });
     }
   };
@@ -50,7 +46,7 @@ export default function DriverForm({
     <>
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
         <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
-          <div className="bg-[#19193E] text-white px-6 py-4 flex justify-between items-center shrink-0">
+          <div className="bg-[#4d7c65] text-white px-6 py-4 flex justify-between items-center shrink-0">
             <h3 className="font-bold text-sm uppercase tracking-wide">
               Nouveau Chauffeur
             </h3>
@@ -66,14 +62,13 @@ export default function DriverForm({
             onSubmit={handleFormSubmit}
             className="p-6 space-y-4 overflow-y-auto flex-1"
           >
-        
             <div className="flex flex-col items-center bg-gray-50 p-4 rounded-xl border border-gray-150">
               <div className="relative mb-3">
                 {driverForm.photo ? (
                   <img
                     src={driverForm.photo}
                     alt="Prévisualisation"
-                    className="w-24 h-24 rounded-full object-cover border-2 border-[#3B3B98] shadow-sm"
+                    className="w-24 h-24 rounded-full object-cover border-2 border-[#4d7c65] shadow-sm"
                   />
                 ) : (
                   <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center text-gray-400 border border-gray-300">
@@ -94,7 +89,7 @@ export default function DriverForm({
                 )}
               </div>
 
-              <label className="cursor-pointer bg-white border border-gray-300 hover:border-[#3B3B98] text-gray-700 hover:text-[#3B3B98] px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all flex items-center space-x-1.5">
+              <label className="cursor-pointer bg-white border border-gray-300 hover:border-[#4d7c65] text-gray-700 hover:text-[#4d7c65] px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-all flex items-center space-x-1.5">
                 <Upload size={14} />
                 <span>
                   {driverForm.photo ? "Changer de photo" : "Importer une photo"}
@@ -111,7 +106,6 @@ export default function DriverForm({
               </p>
             </div>
 
-        
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-gray-500 mb-1">
@@ -127,7 +121,7 @@ export default function DriverForm({
                       f_name: e.target.value.toLowerCase(),
                     })
                   }
-                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none"
+                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none focus:bg-white border border-transparent focus:border-[#4d7c65] transition-all"
                   placeholder="Jean"
                 />
               </div>
@@ -145,7 +139,7 @@ export default function DriverForm({
                       l_name: e.target.value.toLowerCase(),
                     })
                   }
-                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none"
+                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none focus:bg-white border border-transparent focus:border-[#4d7c65] transition-all"
                   placeholder="Rakoto"
                 />
               </div>
@@ -207,7 +201,7 @@ export default function DriverForm({
                   onChange={(e) =>
                     setDriverForm({ ...driverForm, email: e.target.value })
                   }
-                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none"
+                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none focus:bg-white border border-transparent focus:border-[#4d7c65] transition-all"
                   placeholder="jean@gmail.com"
                 />
               </div>
@@ -223,7 +217,7 @@ export default function DriverForm({
                   onChange={(e) =>
                     setDriverForm({ ...driverForm, permit: e.target.value })
                   }
-                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none"
+                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none focus:bg-white border border-transparent focus:border-[#4d7c65] transition-all"
                 >
                   <option value="" disabled>
                     -- Sélectionner --
@@ -244,7 +238,7 @@ export default function DriverForm({
                   onChange={(e) =>
                     setDriverForm({ ...driverForm, age: e.target.value })
                   }
-                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none"
+                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none focus:bg-white border border-transparent focus:border-[#4d7c65] transition-all"
                   placeholder="38"
                 />
               </div>
@@ -262,7 +256,7 @@ export default function DriverForm({
                       experience: e.target.value,
                     })
                   }
-                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none"
+                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none focus:bg-white border border-transparent focus:border-[#4d7c65] transition-all"
                   placeholder="5 ans"
                 />
               </div>
@@ -280,7 +274,7 @@ export default function DriverForm({
                     status_driver: e.target.value,
                   })
                 }
-                className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none"
+                className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none focus:bg-white border border-transparent focus:border-[#4d7c65] transition-all"
               >
                 <option value="" disabled>
                   -- Sélectionner --
@@ -300,7 +294,7 @@ export default function DriverForm({
               </button>
               <button
                 type="submit"
-                className="w-1/2 bg-[#3B3B98] text-white text-sm font-bold py-2.5 rounded-lg shadow-sm"
+                className="w-1/2 bg-[#4d7c65] hover:bg-[#3d6b54] text-white text-sm font-bold py-2.5 rounded-lg shadow-sm"
               >
                 Enregistrer
               </button>

@@ -12,20 +12,27 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80,
+    primary = PrimaryGreen,
+    secondary = LightGreen,
+    tertiary = DarkGreen,
     background = DarkGreen,
-    onBackground = Color.White
+    surface = DarkGreen,
+    onPrimary = Color.White,
+    onSecondary = Color.White,
+    onTertiary = Color.White,
+    onBackground = Color.White,
+    onSurface = Color.White
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = PrimaryGreen,
-    secondary = PurpleGrey40,
-    tertiary = Pink40,
+    secondary = LightGreen,
+    tertiary = DarkGreen,
     background = AppBackground,
     surface = AppSurface,
     onPrimary = Color.White,
+    onSecondary = Color.White,
+    onTertiary = Color.White,
     onBackground = Color.Black,
     onSurface = Color.Black
 )
@@ -34,7 +41,8 @@ private val LightColorScheme = lightColorScheme(
 fun MadaTransitTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    // Disabled by default to use the green palette colors
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

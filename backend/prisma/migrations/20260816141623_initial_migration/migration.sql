@@ -7,15 +7,15 @@ CREATE TABLE `User` (
     `phone_number` VARCHAR(15) NOT NULL,
     `email` VARCHAR(50) NOT NULL,
     `password` VARCHAR(255) NULL,
-    `status` VARCHAR(20) NOT NULL,
+    `status` VARCHAR(20) NULL,
     `role` VARCHAR(20) NOT NULL,
-    `id_driver` INTEGER NULL,
     `permit` VARCHAR(3) NULL,
     `age` INTEGER NULL,
     `experience` VARCHAR(20) NULL,
     `status_driver` VARCHAR(10) NULL,
     `discriminator` VARCHAR(50) NOT NULL,
     `photo` VARCHAR(50) NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     PRIMARY KEY (`id_user`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -25,9 +25,11 @@ CREATE TABLE `Bus` (
     `id_bus` INTEGER NOT NULL AUTO_INCREMENT,
     `driver_id` INTEGER NULL,
     `registration` VARCHAR(12) NOT NULL,
+    `modele` VARCHAR(20) NOT NULL,
     `capacity` INTEGER NOT NULL,
     `image` VARCHAR(255) NOT NULL,
     `status_bus` VARCHAR(15) NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     PRIMARY KEY (`id_bus`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -37,6 +39,7 @@ CREATE TABLE `UserControlledBus` (
     `id_control` INTEGER NOT NULL AUTO_INCREMENT,
     `admin_id` INTEGER NOT NULL,
     `bus_id` INTEGER NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     PRIMARY KEY (`id_control`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -48,7 +51,8 @@ CREATE TABLE `Line` (
     `line_name` VARCHAR(255) NOT NULL,
     `description` VARCHAR(255) NOT NULL,
     `price` DOUBLE NOT NULL DEFAULT 1500.0,
-    `route_path` JSON NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `road_path` JSON NOT NULL,
 
     PRIMARY KEY (`id_line`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -71,6 +75,7 @@ CREATE TABLE `LineStop` (
     `line_id` INTEGER NOT NULL,
     `stop_id` INTEGER NOT NULL,
     `order` INTEGER NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     UNIQUE INDEX `LineStop_line_id_order_key`(`line_id`, `order`),
     PRIMARY KEY (`id_line_stop`)
@@ -94,9 +99,11 @@ CREATE TABLE `Ticket` (
     `id_ticket` INTEGER NOT NULL AUTO_INCREMENT,
     `num_ticket` VARCHAR(255) NOT NULL,
     `qr_code` VARCHAR(255) NOT NULL,
-    `status_ticket` VARCHAR(255) NOT NULL DEFAULT 'Valide',
+    `status_ticket` VARCHAR(255) NOT NULL DEFAULT 'AVAILABLE',
     `price` DOUBLE NOT NULL DEFAULT 0.0,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `expired_at` DATETIME(3) NULL,
+    `used_at` DATETIME(3) NULL,
     `stop_id` INTEGER NOT NULL,
     `driver_id` INTEGER NULL,
     `bus_id` INTEGER NULL,

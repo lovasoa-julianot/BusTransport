@@ -2,6 +2,7 @@ package com.orion.madatransit.screen
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Paint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -23,6 +25,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.orion.madatransit.api.ApiService
+import com.orion.madatransit.repository.BusRepository
+import com.orion.madatransit.viewModel.BusViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.location.LocationServices
@@ -35,15 +42,31 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.Polyline
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @SuppressLint("MissingPermission")
 @Composable
-fun MainHomeScreen(onNavigateToItinerary: (destination: String) -> Unit) {
-    val primaryColor = Color(0xFF5E17EB)
+fun MainHomeScreen(
+    onNavigateToItinerary: (destination: String) -> Unit,
+    viewModel: BusViewModel = viewModel(
+        factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                val apiService = ApiService.create()
+                val repository = BusRepository(apiService)
+                return BusViewModel(repository) as T
+            }
+        }
+    )
+) {
+    val primaryColor = MaterialTheme.colorScheme.primary
     val context = LocalContext.current
+
+    val stops by viewModel.stops.collectAsStateWithLifecycle()
+    val allLinePaths by viewModel.linePaths.collectAsStateWithLifecycle()
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
 
     // Permisssions handling
     val locationPermissionsState = rememberMultiplePermissionsState(
@@ -56,24 +79,25 @@ fun MainHomeScreen(onNavigateToItinerary: (destination: String) -> Unit) {
     // Configuration d'OSM
     Configuration.getInstance().load(context, context.getSharedPreferences("osm_pref", Context.MODE_PRIVATE))
 
-    val allStops = remember {
-        listOf(
-            BusStop("1", "Arrêt Andrainjato", GeoPoint(-21.4536, 47.0858), "250 m", "Lignes : 1, 3, 7", Color(0xFF00C853)),
-            BusStop("2", "Arrêt Mahazengy", GeoPoint(-21.4580, 47.0890), "480 m", "Lignes : 2, 4", Color(0xFF00C853)),
-            BusStop("3", "Arrêt Anosizato", GeoPoint(-21.4490, 47.0810), "650 m", "Lignes : 1, 5, 8", Color(0xFFFF9800)),
-            BusStop("4", "Arrêt Ambohijatovo", GeoPoint(-21.4620, 47.0950), "810 m", "Lignes : 3, 6", Color(0xFFFF9800))
-        )
-    }
-
     var searchQuery by remember { mutableStateOf("") }
     var selectedStop by remember { mutableStateOf<BusStop?>(null) }
     
-    // Default position (Fianarantsoa centre) if permission is denied
+    // Default position if permission is denied
     val defaultPosition = GeoPoint(-21.4536, 47.0858)
     var userPosition by remember { mutableStateOf<GeoPoint?>(null) }
     var mapView by remember { mutableStateOf<MapView?>(null) }
 
-    // Effect to get real location when permission is granted
+    // Use fetched road path based on selected line if available
+    val roadPath = remember(selectedStop, allLinePaths) {
+        val currentStop = selectedStop
+        if (currentStop != null) {
+            // Find path for one of the lines of the selected stop
+            val line = currentStop.availableLines.split(",").firstOrNull()?.trim()
+            allLinePaths[line] ?: emptyList()
+        } else {
+            emptyList()
+        }
+    }
     LaunchedEffect(locationPermissionsState.allPermissionsGranted) {
         if (locationPermissionsState.allPermissionsGranted) {
             val fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
@@ -87,23 +111,29 @@ fun MainHomeScreen(onNavigateToItinerary: (destination: String) -> Unit) {
         }
     }
 
-    // Effect to request permissions once
     LaunchedEffect(Unit) {
         locationPermissionsState.launchMultiplePermissionRequest()
     }
 
     val scaffoldState = rememberBottomSheetScaffoldState()
 
-    // Filtered stops based on search
-    val filteredStops = remember(searchQuery) {
-        if (searchQuery.isBlank()) allStops
-        else allStops.filter { it.name.contains(searchQuery, ignoreCase = true) || it.availableLines.contains(searchQuery) }
+    val stopsWithDistance = remember(stops, userPosition) {
+        val pos = userPosition ?: defaultPosition
+        stops.map { stop ->
+            val dist = stop.location.distanceToAsDouble(pos)
+            val distStr = if (dist < 1000) "${dist.toInt()} m" else "%.1f km".format(dist / 1000.0)
+            stop.copy(distance = distStr)
+        }.sortedBy { it.location.distanceToAsDouble(pos) }
     }
 
-    // Recommendation logic: find the closest stop (use userPosition or default)
+    val filteredStops = remember(searchQuery, stopsWithDistance) {
+        if (searchQuery.isBlank()) stopsWithDistance
+        else stopsWithDistance.filter { it.name.contains(searchQuery, ignoreCase = true) || it.availableLines.contains(searchQuery) }
+    }
+
     val effectiveUserPosition = userPosition ?: defaultPosition
-    val recommendedStop = remember(allStops, userPosition) {
-        allStops.minByOrNull { it.location.distanceToAsDouble(effectiveUserPosition) }
+    val recommendedStop = remember(stopsWithDistance) {
+        stopsWithDistance.firstOrNull()
     }
 
     BottomSheetScaffold(
@@ -141,9 +171,12 @@ fun MainHomeScreen(onNavigateToItinerary: (destination: String) -> Unit) {
             userPosition = effectiveUserPosition,
             isLocationKnown = userPosition != null,
             filteredStops = filteredStops,
+            roadPath = roadPath,
+            selectedStop = selectedStop,
             onStopSelected = { selectedStop = it },
             mapView = mapView,
-            onMapViewReady = { mapView = it }
+            onMapViewReady = { mapView = it },
+            isLoading = isLoading
         )
     }
 }
@@ -171,7 +204,6 @@ fun BottomSheetContent(
                 onGoToItinerary = { onNavigate(selectedStop.name) }
             )
         } else {
-            // Recommendation Section
             if (recommendedStop != null && filteredStops.contains(recommendedStop)) {
                 RecommendationCard(recommendedStop, primaryColor) { onStopSelected(recommendedStop) }
                 Spacer(modifier = Modifier.height(16.dp))
@@ -249,9 +281,12 @@ fun MainContent(
     userPosition: GeoPoint,
     isLocationKnown: Boolean,
     filteredStops: List<BusStop>,
+    roadPath: List<GeoPoint>,
+    selectedStop: BusStop?,
     onStopSelected: (BusStop) -> Unit,
     mapView: MapView?,
-    onMapViewReady: (MapView) -> Unit
+    onMapViewReady: (MapView) -> Unit,
+    isLoading: Boolean
 ) {
     Box(
         modifier = Modifier
@@ -259,6 +294,16 @@ fun MainContent(
             .background(Color(0xFFF6F7FB))
             .padding(bottom = innerPadding.calculateBottomPadding())
     ) {
+        if (isLoading) {
+            LinearProgressIndicator(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .align(Alignment.TopCenter)
+                    .zIndex(2f),
+                color = primaryColor
+            )
+        }
         AndroidView(
             factory = { ctx ->
                 MapView(ctx).apply {
@@ -276,8 +321,19 @@ fun MainContent(
             },
             modifier = Modifier.fillMaxSize(),
             update = { view ->
-                view.overlays.removeIf { it is Marker }
+                view.overlays.removeIf { it is Marker || it is Polyline }
                 
+                // Tracé du chemin du bus (Polyline) if a stop is selected
+                if (selectedStop != null) {
+                    val polyline = Polyline(view)
+                    polyline.setPoints(roadPath)
+                    val colorInt = primaryColor.value.toLong().toInt()
+                    polyline.outlinePaint.color = colorInt
+                    polyline.outlinePaint.strokeWidth = 10f
+                    polyline.outlinePaint.strokeCap = Paint.Cap.ROUND
+                    view.overlays.add(polyline)
+                }
+
                 // Add User Position Marker if known
                 if (isLocationKnown) {
                     val userMarker = Marker(view)
@@ -360,14 +416,13 @@ fun HeaderSection(primaryColor: Color, searchQuery: String, onSearchChange: (Str
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
                     focusedIndicatorColor = Color.Transparent,
+                    focusedTextColor = Color.Gray,
+                    unfocusedTextColor = Color.Gray,
                     unfocusedIndicatorColor = Color.Transparent
                 ),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                 modifier = Modifier.weight(1f)
             )
-            IconButton(onClick = {}) {
-                Icon(Icons.Default.AccountCircle, contentDescription = "Profile", tint = primaryColor)
-            }
         }
     }
 }

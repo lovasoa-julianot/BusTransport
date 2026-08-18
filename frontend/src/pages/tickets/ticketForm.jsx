@@ -30,9 +30,6 @@ export default function TicketForm({
   setIsEdit,
   setIsModalOpen,
 }) {
-  // useEffect(() => {
-  //   console.log(isEdit ? " Modification " : "Enregsitrement");
-  // }, [isEdit]);
 
   return (
     <>

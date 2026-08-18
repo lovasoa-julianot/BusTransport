@@ -1,4 +1,0 @@
--- AlterTable
-ALTER TABLE `Ticket` ADD COLUMN `expired_at` DATETIME(3) NULL,
-    ADD COLUMN `used_at` DATETIME(3) NULL,
-    MODIFY `status_ticket` VARCHAR(255) NOT NULL DEFAULT 'AVAILABLE';

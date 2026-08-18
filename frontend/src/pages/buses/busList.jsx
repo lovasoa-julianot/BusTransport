@@ -98,6 +98,51 @@ export default function BusList({ isModalOpen, setIsModalOpen }) {
     setIsModalOpen(false);
   };
 
+  const handleUpdateBus = (e) => {
+    e.preventDefault();
+
+    const formData = new FormData();
+
+    formData.append("driver_id", busForm.driver?.id_user || "");
+    formData.append("registration", busForm.registration);
+    formData.append("capacity", busForm.capacity);
+    formData.append("status_bus", busForm.status_bus);
+    formData.append("modele", busForm.modele);
+
+    if (busForm.photo) {
+      formData.append("photo", busForm.photo);
+    }
+
+    api
+      .put(`/bus/update/${busForm.id_bus}`, formData)
+      .then((response) => {
+        if (response.data.success) {
+          Swal.fire({
+            icon: "success",
+            title: "Succès",
+            text: "Bus mis à jour avec succès.",
+          });
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Erreur",
+            text: response.data.error,
+          });
+        }
+        getAllBuses();
+      })
+      .catch((error) => {
+        Swal.fire({
+          icon: "error",
+          title: "Erreur",
+          text: error.response?.data?.error || "Erreur mise à jour du bus",
+        });
+      });
+
+    setIsEdit(false);
+    setIsModalOpen(false);
+  };
+
   return (
     <div className="space-y-6">
       <Table
@@ -244,7 +289,7 @@ export default function BusList({ isModalOpen, setIsModalOpen }) {
         <BusForm
           busForm={busForm}
           setBusForm={setBusForm}
-          handleFormSubmit={handleFormSubmit}
+          handleFormSubmit={handleUpdateBus}
           isDriverModalOpen={isDriverModalOpen}
           setIsDriverModalOpen={setIsDriverModalOpen}
           isEdit={isEdit}

@@ -10,7 +10,7 @@ export default function DashboardLayout({ user, handleLogout }) {
 
       <Navbar />
 
-      <main className="max-w-9xl mx-auto px-6 py-8">
+      <main className="max-w-9xl mx-auto px-40 py-8">
         <Outlet />
       </main>
     </div>

@@ -73,10 +73,6 @@ export default function LineForm({
   setIsEdit,
   setIsModalOpen,
 }) {
-  // useEffect(() => {
-  //   console.log(isEdit ? " Modification " : "Enregsitrement");
-  // }, [isEdit]);
-
   const routePoints = [
     ...lineForm.lineStops.map((ls) => ({
       latitude: parseFloat(ls.stop.latitude),
@@ -89,7 +85,7 @@ export default function LineForm({
     <>
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
         <div className="bg-white rounded-2xl w-full max-w-6xl h-[90vh] shadow-2xl overflow-hidden flex flex-col">
-          <div className="bg-[#19193E] text-white px-6 py-4 flex justify-between items-center shrink-0">
+          <div className="bg-[#4d7c65] text-white px-6 py-4 flex justify-between items-center shrink-0">
             <h3 className="font-bold text-sm uppercase tracking-wide">
               {!isEdit ? "Nouvelle : Ligne" : "Modification : Ligne"}
             </h3>
@@ -119,7 +115,7 @@ export default function LineForm({
                   onChange={(e) =>
                     setLineForm({ ...lineForm, line_name: e.target.value })
                   }
-                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none"
+                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none focus:bg-white border border-transparent focus:border-[#4d7c65] transition-all"
                   placeholder="Ex: Ligne 4"
                 />
               </div>
@@ -137,7 +133,7 @@ export default function LineForm({
                       description: e.target.value,
                     })
                   }
-                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none"
+                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none focus:bg-white border border-transparent focus:border-[#4d7c65] transition-all"
                   placeholder="Ex: Andrainjato - Mahazengy - Anjoma"
                 />
               </div>
@@ -152,7 +148,7 @@ export default function LineForm({
                     onChange={(e) =>
                       setLineForm({ ...lineForm, bus_id: e.target.value })
                     }
-                    className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none"
+                    className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none focus:bg-white border border-transparent focus:border-[#4d7c65] transition-all"
                   >
                     <option value="">Choisir un bus...</option>
                     {buses.map((b) => (
@@ -173,14 +169,14 @@ export default function LineForm({
                     onChange={(e) =>
                       setLineForm({ ...lineForm, price: e.target.value })
                     }
-                    className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none"
+                    className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none focus:bg-white border border-transparent focus:border-[#4d7c65] transition-all"
                     placeholder="600"
                   />
                 </div>
               </div>
 
               <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 space-y-3">
-                <label className="block text-xs font-bold text-[#3B3B98] uppercase">
+                <label className="block text-xs font-bold text-[#4d7c65] uppercase">
                   Itinéraire ordonné
                 </label>
                 <div className="space-y-1.5 max-h-64 h-64 overflow-y-auto">
@@ -218,7 +214,7 @@ export default function LineForm({
                   <select
                     id="addStopSelect"
                     defaultValue=""
-                    className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none"
+                    className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none focus:bg-white border border-transparent focus:border-[#4d7c65] transition-all"
                   >
                     <option value="" disabled>
                       Sélectionner un arrêt à insérer...
@@ -255,7 +251,7 @@ export default function LineForm({
                         sel.value = "";
                       }
                     }}
-                    className="bg-[#3B3B98] text-white px-3 py-1 rounded-lg text-xs font-bold"
+                    className="bg-[#4d7c65] text-white px-3 py-1 rounded-lg text-xs font-bold"
                   >
                     Ajouter
                   </button>
@@ -271,7 +267,7 @@ export default function LineForm({
             </div>
 
             <div className="flex-1 p-4">
-              {lineForm.lineStops.length > 1 && (
+              {lineForm.lineStops.length > 1 ? (
                 <div className="w-full h-full rounded-xl overflow-hidden border border-gray-200">
                   <MapContainer
                     center={[
@@ -302,6 +298,10 @@ export default function LineForm({
                     />
                   </MapContainer>
                 </div>
+              ) : (
+                <span className="text-center flex m-auto text-gray-700">
+                  Preview Cartographie
+                </span>
               )}
             </div>
           </form>

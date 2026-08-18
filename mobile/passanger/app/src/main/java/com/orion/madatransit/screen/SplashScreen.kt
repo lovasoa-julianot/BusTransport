@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -17,6 +18,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import com.orion.madatransit.R
 
 @Composable
 fun SplashScreen() {
@@ -27,36 +30,20 @@ fun SplashScreen() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Icon(
-            painter = painterResource(id = android.R.drawable.ic_menu_compass),
-            contentDescription = "Logo MadaTransit",
-            tint = Color.White,
-            modifier = Modifier.size(100.dp)
-        )
+        Column {
+            AsyncImage(
+            model = R.drawable.logo,
+            modifier = Modifier.size(400.dp),
+            contentDescription = null
+            )
 
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Text(
-            text = "MadaTransit",
-            fontSize = 36.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.White
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = "Votre trajet, notre priorité",
-            fontSize = 18.sp,
-            color = Color(0xFFA3D9C9)
-        )
-
-        Spacer(modifier = Modifier.height(48.dp))
-
-        Text(
-            text = "Chargement en cours...",
-            fontSize = 14.sp,
-            color = Color.White.copy(alpha = 0.7f)
-        )
+//            Spacer(modifier = Modifier.height(16.dp))
+//
+//            Text(
+//                text = "Votre trajet, notre priorité",
+//                fontSize = 18.sp,
+//                color = Color.Black
+//            )
+        }
     }
 }

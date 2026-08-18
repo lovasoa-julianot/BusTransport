@@ -32,7 +32,7 @@ fun SelectedStopBanner(stop: BusStop, onClose: () -> Unit, onGoToItinerary: () -
         Button(
             onClick = onGoToItinerary,
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5E17EB)),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             shape = RoundedCornerShape(12.dp)
         ) {
             Icon(Icons.Default.Place, contentDescription = null)

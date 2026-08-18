@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -43,7 +44,7 @@ fun BottomSection(
                             if (currentPage == 0) {
                                 if (isSelected) Color.White else Color.White.copy(alpha = 0.4f)
                             } else {
-                                if (isSelected) Color(0xFF4A25A9) else Color.LightGray
+                                if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
                             }
                         )
                 )
@@ -54,9 +55,9 @@ fun BottomSection(
         if (currentPage == pageCount - 1) {
             Button(
                 onClick = onFinish,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4A25A9))
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
-                Text("Commencer")
+                Text("Commencer", color = MaterialTheme.colorScheme.onPrimary)
             }
         }
     }

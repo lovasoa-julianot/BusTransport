@@ -21,16 +21,13 @@ export default function UserForm({
   setIsEdit,
   setIsModalOpen,
 }) {
-  // useEffect(() => {
-  //   console.log(isEdit ? " Modification " : "Enregsitrement");
-  // }, [isEdit]);
 
   return (
     <>
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
         <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
         
-          <div className="bg-[#19193E] text-white px-6 py-4 flex justify-between items-center shrink-0">
+          <div className="bg-[#4d7c65] text-white px-6 py-4 flex justify-between items-center shrink-0">
             <h3 className="font-bold text-sm uppercase tracking-wide flex items-center space-x-2">
               <UserCheck size={18} />
               <span>Créer un nouvel accès</span>
@@ -60,7 +57,7 @@ export default function UserForm({
                   onChange={(e) =>
                     setUserForm({ ...userForm, f_name: e.target.value })
                   }
-                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none focus:bg-white border border-transparent focus:border-[#3B3B98] transition-all"
+                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none focus:bg-white border border-transparent focus:border-[#4d7c65] transition-all"
                   placeholder="Ex: Rova"
                 />
               </div>
@@ -75,7 +72,7 @@ export default function UserForm({
                   onChange={(e) =>
                     setUserForm({ ...userForm, l_name: e.target.value })
                   }
-                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none focus:bg-white border border-transparent focus:border-[#3B3B98] transition-all"
+                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none focus:bg-white border border-transparent focus:border-[#4d7c65] transition-all"
                   placeholder="Ex: Ranaivo"
                 />
               </div>
@@ -91,7 +88,7 @@ export default function UserForm({
                 onChange={(e) =>
                   setUserForm({ ...userForm, username: e.target.value })
                 }
-                className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm font-mono outline-none focus:bg-white border border-transparent focus:border-[#3B3B98] transition-all"
+                className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm font-mono outline-none focus:bg-white border border-transparent focus:border-[#4d7c65] transition-all"
                 placeholder="Ex: rova_ctrl (Sera auto-généré si vide)"
               />
             </div>
@@ -108,7 +105,7 @@ export default function UserForm({
                   onChange={(e) =>
                     setUserForm({ ...userForm, phone_number: e.target.value })
                   }
-                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none focus:bg-white border border-transparent focus:border-[#3B3B98] transition-all"
+                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none focus:bg-white border border-transparent focus:border-[#4d7c65] transition-all"
                   placeholder="034 00 000 00"
                 />
               </div>
@@ -123,7 +120,7 @@ export default function UserForm({
                   onChange={(e) =>
                     setUserForm({ ...userForm, email: e.target.value })
                   }
-                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none focus:bg-white border border-transparent focus:border-[#3B3B98] transition-all"
+                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none focus:bg-white border border-transparent focus:border-[#4d7c65] transition-all"
                   placeholder="exemple@transport.mg"
                 />
               </div>
@@ -161,7 +158,7 @@ export default function UserForm({
                   onChange={(e) =>
                     setUserForm({ ...userForm, password: e.target.value })
                   }
-                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none focus:bg-white border border-transparent focus:border-[#3B3B98] transition-all"
+                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none focus:bg-white border border-transparent focus:border-[#4d7c65] transition-all"
                   placeholder="••••••••"
                 />
               </div>
@@ -178,7 +175,7 @@ export default function UserForm({
               </button>
               <button
                 type="submit"
-                className="w-1/2 bg-[#3B3B98] text-white text-sm font-bold py-2.5 rounded-lg shadow-sm hover:bg-[#19193E] transition-colors"
+                className="w-1/2 bg-[#4d7c65] hover:bg-[#3d6b54] text-white text-sm font-bold py-2.5 rounded-lg shadow-sm transition-colors"
               >
                 Créer le compte
               </button>

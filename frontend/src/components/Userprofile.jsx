@@ -1,11 +1,7 @@
 import React, { useState } from "react";
-import api from "../hooks/api";
-import { useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
 
 export default function UserProfile({ user, handleLogout }) {
   const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
 
   const getColorForLetter = (letter = "") => {
     const l = letter.toUpperCase();
@@ -20,25 +16,6 @@ export default function UserProfile({ user, handleLogout }) {
 
     return "#6b7280";
   };
-
-  // const handleLogout = () => {
-  //   api
-  //     .post("/auth/logout")
-  //     .then((res) => {
-  //       console.log("Reponse: ", res.data.success);
-  //       if (res.data.success) {
-
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.log("Erreur de deconnction", error.message);
-  //       Swal.fire({
-  //         title: "Erreur",
-  //         text: `${error.message}` || "Erreur de deconnection",
-  //         icon: "error",
-  //       });
-  //     });
-  // };
 
   if (!user) return null;
 
@@ -73,12 +50,12 @@ export default function UserProfile({ user, handleLogout }) {
 
           <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-xl shadow-lg z-20 overflow-hidden">
             <div className="flex items-center gap-3 p-4 border-b">
-              <div
+              {/* <div
                 className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold"
                 style={{ backgroundColor: getColorForLetter(initial) }}
               >
                 {initial}
-              </div>
+              </div> */}
 
               <div>
                 <p className="font-semibold text-gray-800">{user.username}</p>

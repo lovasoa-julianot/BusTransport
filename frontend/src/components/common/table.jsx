@@ -5,13 +5,13 @@ export default function Table({ title, headers, children }) {
         {title}
       </div>
 
-      <div className="max-h-[600px] overflow-y-auto overflow-x-auto">
+      <div className="max-h-150 overflow-y-auto overflow-x-auto">
         <table className="w-full table-fixed text-left text-sm text-gray-600">
           <thead className="sticky top-0 bg-gray-50 text-xs text-gray-400 uppercase font-mono z-10">
             <tr>
               {headers.map((header, index) => (
                 <th key={index} className="px-6 py-3 bg-gray-50">
-                  {header}
+                  {typeof header === "object" ? header.label : header}
                 </th>
               ))}
             </tr>

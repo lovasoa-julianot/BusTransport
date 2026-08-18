@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,8 +25,8 @@ fun OnboardingScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                if (pagerState.currentPage == 0) PrimaryGreen
-                else AppBackground
+                if (pagerState.currentPage == 0) MaterialTheme.colorScheme.onBackground
+                else MaterialTheme.colorScheme.onBackground
             )
     ) {
 

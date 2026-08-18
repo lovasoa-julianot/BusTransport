@@ -95,6 +95,28 @@ export default function TrackingContent() {
 
   const [selectedLine, setSelectedLine] = useState("");
 
+  const fetchBuses = async () => {
+    try {
+      const response = await api.get("/buses");
+      const res = response.data.data;
+      console.log("Réponse de l'API :", res);
+      setBuses(res);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des bus :", error);
+    }
+  };
+
+  const fetchStops = async () => {
+    try {
+      const response = await api.get("/stops");
+      const res = response.data.data;
+      console.log("Réponse de l'API :", res);
+      setStops(res);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des arrêts :", error);
+    }
+  };
+
   const fetchLines = async () => {
     const response = await api.get("/lines");
 
@@ -146,7 +168,7 @@ export default function TrackingContent() {
             onChange={(e) => setSelectedLine(e.target.value)}
             className="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-lg text-sm outline-none focus:border-[#3B3B98] focus:bg-white font-medium transition-all"
           >
-            <option value="">🗺️ Afficher tout le réseau</option>
+            <option value="">Afficher tout le réseau</option>
             {lines.map((line) => (
               <option key={line.id_line} value={line.id_line}>
                 {line.name_line}
@@ -157,7 +179,7 @@ export default function TrackingContent() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-3 bg-white rounded-2xl shadow-sm p-2 border border-gray-100 overflow-hidden h-[550px] z-10">
+        <div className="lg:col-span-3 bg-white rounded-2xl shadow-sm p-2 border border-gray-100 overflow-hidden h-[700px] z-10">
           <MapContainer
             center={fianaCenter}
             zoom={14}

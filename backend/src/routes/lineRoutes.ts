@@ -6,7 +6,9 @@ const router = Router();
 const lineController = new LineController();
 
 router.post("/lines", verifyToken, requireRole("Admin"), lineController.create);
+
 router.get("/lines", lineController.getAll);
+
 router.get(
   "/lines/:id",
   verifyToken,

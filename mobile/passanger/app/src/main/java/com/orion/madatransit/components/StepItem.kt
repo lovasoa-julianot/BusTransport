@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,10 +29,10 @@ fun StepItem(step: String, text: String) {
             modifier = Modifier
                 .size(28.dp)
                 .clip(CircleShape)
-                .background(Color(0xFF4A25A9)),
+                .background(MaterialTheme.colorScheme.primary),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = step, color = Color.White, fontWeight = FontWeight.Bold)
+            Text(text = step, color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.width(12.dp))
         Text(text = text, fontSize = 14.sp)

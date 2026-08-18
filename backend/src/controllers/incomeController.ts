@@ -59,6 +59,30 @@ export class IncomeController {
     }
   }
 
+  async filterByDate(req: Request, res: Response) {
+    try {
+      const bus_id = Array.isArray(req.params.id)
+        ? req.params.id[0]
+        : req.params.id;
+
+      // const id = parseInt(bus_id as string, 10);
+
+      console.log("Bus ID from request params:", bus_id);
+
+      const amount = await incomeService.filterIncomeByDate(bus_id);
+
+      res.status(200).json({
+        success: true,
+        data: { amount },
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  }
+
   async getAll(req: Request, res: Response) {
     try {
       const incomes = await incomeService.getAllIncomes();

@@ -12,12 +12,20 @@ router.post(
   incomeController.create,
 );
 
+// router.get(
+//   "/income",
+//   verifyToken,
+//   requireRole("Admin"),
+//   incomeController.getAll,
+// );
+
 router.get(
-  "/income",
-  verifyToken,
-  requireRole("Admin"),
-  incomeController.getAll,
+  "/income/:id",
+  // verifyToken,
+  // requireRole("Admin"),
+  incomeController.filterByDate,
 );
+
 router.get(
   "/income/:id",
   verifyToken,

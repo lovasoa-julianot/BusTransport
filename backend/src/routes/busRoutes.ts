@@ -15,14 +15,16 @@ router.post(
 );
 
 router.get("/buses", verifyToken, requireRole("Admin"), busController.getAll);
+
 router.get(
-  "/buses/:id",
+  "/bus/:id",
   verifyToken,
   requireRole("Admin"),
   busController.getById,
 );
+
 router.put(
-  "/buses/update/:id",
+  "/bus/update/:id",
   verifyToken,
   requireRole("Admin"),
   busController.update,

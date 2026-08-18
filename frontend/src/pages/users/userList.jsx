@@ -9,6 +9,9 @@ import {
   Mail,
   Phone,
   UserCheck,
+  Edit2,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import Table from "../../components/common/table";
 import Pagination from "../../components/common/pagination";
@@ -202,13 +205,13 @@ export default function UserList() {
               </td>
 
               <td className="px-6 py-4 space-y-0.5">
-                <div className="text-xs font-medium text-gray-700 flex items-center">
-                  <Mail size={12} className="mr-1 text-gray-400" /> {user.email}
+                <div className="text-xs font-medium text-blue-700 flex items-center underline cursor-alias">
+                  {user.email}
                 </div>
-                <div className="text-[11px] text-gray-400 flex items-center">
-                  <Phone size={12} className="mr-1 text-gray-400" />{" "}
+                {/* <div className="text-[11px] text-gray-400 flex items-center">
+                  {" "}
                   {user.phone_number}
-                </div>
+                </div> */}
               </td>
 
               <td className="px-6 py-4">
@@ -225,15 +228,24 @@ export default function UserList() {
                 </button>
               </td>
 
-              <td className="px-6 py-4">
+              <td className="px-6 py-5 flex items-center gap-2">
                 <button
-                  onClick={() =>
-                    setUsers(users.filter((u) => u.id_user !== user.id_user))
-                  }
-                  className="text-red-500 hover:text-red-700 transition-colors p-1"
-                  title="Supprimer définitivement"
+                  onClick={() => {}}
+                  className="w-10 h-10 rounded-full border border-gray-200 hover:bg-indigo-50 hover:text-indigo-600 transition flex items-center justify-center cursor-pointer"
                 >
-                  <Trash2 size={16} />
+                  <EyeOff size={18} />
+                </button>
+                <button
+                  onClick={() => {}}
+                  className="w-10 h-10 rounded-full border border-gray-200 hover:bg-indigo-50 hover:text-indigo-600 transition flex items-center justify-center cursor-pointer"
+                >
+                  <Edit2 size={18} />
+                </button>
+                <button
+                  onClick={() => {}}
+                  className="w-10 h-10 rounded-full border border-gray-200 hover:bg-indigo-50 hover:text-red-600 transition flex items-center justify-center cursor-pointer"
+                >
+                  <Trash2 size={18} />
                 </button>
               </td>
             </tr>

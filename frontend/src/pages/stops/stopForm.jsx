@@ -71,10 +71,6 @@ export default function StopForm({
   setIsEdit,
   setIsModalOpen,
 }) {
-  // useEffect(() => {
-  //   console.log(isEdit ? " Modification " : "Enregsitrement");
-  // }, [isEdit]);
-
   const searchCity = (query) => {
     if (!query) return;
     fetch(
@@ -100,7 +96,7 @@ export default function StopForm({
     <>
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
         <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
-          <div className="bg-[#19193E] text-white px-6 py-4 flex justify-between items-center shrink-0">
+          <div className="bg-[#4d7c65] text-white px-6 py-4 flex justify-between items-center shrink-0">
             <h3 className="font-bold text-sm uppercase tracking-wide">
               {!isEdit ? "Nouvel arrêt" : "Modification d'un arrêt"}
             </h3>
@@ -130,7 +126,7 @@ export default function StopForm({
                   onChange={(e) =>
                     setStopForm({ ...stopForm, name_stop: e.target.value })
                   }
-                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none"
+                  className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none focus:bg-white border border-transparent focus:border-[#4d7c65] transition-all"
                   placeholder="Ex: Arrêt Pharmacie"
                 />
               </div>
@@ -142,7 +138,7 @@ export default function StopForm({
                   <input
                     type="text"
                     placeholder="Ex: Mahazengy, Anjoma..."
-                    className="flex-1 bg-[#EAEAEA] p-2 rounded-lg text-sm outline-none"
+                    className="w-full bg-[#EAEAEA] p-2.5 rounded-lg text-sm outline-none focus:bg-white border border-transparent focus:border-[#4d7c65] transition-all"
                     onKeyDown={(e) =>
                       e.key === "Enter" &&
                       (e.preventDefault(), searchCity(e.target.value))
@@ -166,7 +162,7 @@ export default function StopForm({
                         })),
                       )
                     }
-                    className="text-[10px] text-[#3B3B98] font-bold underline"
+                    className="text-[10px] text-[#4d7c65] font-bold underline cursor-pointer"
                   >
                     Ma position
                   </button>

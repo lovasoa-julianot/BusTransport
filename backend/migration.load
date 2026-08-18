@@ -1,0 +1,14 @@
+LOAD DATABASE
+    FROM mysql://orion:orion3691@localhost:3306/bus_transport_db
+    INTO postgresql://postgres.hyrhuoagsfdddgifqfrj:fenonantenaiko@aws-1-eu-central-1.pooler.supabase.com:5432/postgres
+
+WITH
+    create tables,
+    create indexes,
+    reset sequences,
+    foreign keys,
+    downcase identifiers
+
+SET
+    maintenance_work_mem to '256MB',
+    work_mem to '16MB';

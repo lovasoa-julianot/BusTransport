@@ -11,13 +11,6 @@ data class OnboardingPage(
     val isSplashScreen: Boolean = false
 )
 
-//data class BusStop(
-//    val id: String,
-//    val name: String,
-//    val location: LatLng,
-//    val distanceMeters: Int
-//)
-
 data class BusStop(
     val id: String,
     val name: String,

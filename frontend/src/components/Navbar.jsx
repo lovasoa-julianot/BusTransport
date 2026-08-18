@@ -20,13 +20,13 @@ export default function Navbar() {
     },
     {
       id: "buses",
-      name: "Buses",
+      name: "Bus",
       path: "/buses",
       icon: <Bus size={20} />,
     },
     {
       id: "driver",
-      name: "Driver",
+      name: "Chauffeur",
       path: "/drivers",
       icon: <UserSquare2 size={20} />,
     },
@@ -38,7 +38,7 @@ export default function Navbar() {
     },
     {
       id: "users",
-      name: "Users",
+      name: "Utilisateurs",
       path: "/users",
       icon: <Users size={20} />,
     },
@@ -51,8 +51,8 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="bg-white border-b border-gray-200 shadow-sm px-6">
-      <div className="max-w-7xl mx-auto flex space-x-8">
+    <nav className="bg-white border-b border-gray-200 shadow-sm px-40">
+      <div className=" mx-auto flex space-x-8">
         {menus.map((menu) => (
           <NavItem
             key={menu.id}

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -19,9 +20,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 
 @Composable
-fun FeatureItem(title: String, description: String) {
+fun FeatureItem(title: String, description: String, model: Int) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -32,11 +34,14 @@ fun FeatureItem(title: String, description: String) {
             modifier = Modifier
                 .size(48.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(Color(0xFFEDE7F6)),
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
             contentAlignment = Alignment.Center
         ) {
-            // Remplace par une vraie icône Vectorielle
-            Text("🚌", fontSize = 20.sp)
+            AsyncImage(
+                model = model,
+                modifier = Modifier.size(20.dp),
+                contentDescription = null
+            )
         }
         Spacer(modifier = Modifier.width(16.dp))
         Column {

@@ -32,8 +32,8 @@ export default function App() {
       .post("/auth/logout")
       .then((res) => {
         if (res.data.success) {
-          // setAuth(false);
-          checkToken();
+          setUser(null);
+          setAuth(false);
         }
       })
       .catch((error) => {

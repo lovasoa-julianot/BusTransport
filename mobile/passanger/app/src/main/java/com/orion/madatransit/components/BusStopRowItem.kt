@@ -49,11 +49,3 @@ fun BusStopRowItem(stop: BusStop, onClick: () -> Unit) {
         }
     }
 }
-
-private fun RowScope.Text(
-    distance: String,
-    color: android.graphics.Color,
-    fontWeight: FontWeight,
-    fontSize: TextUnit
-) {
-}

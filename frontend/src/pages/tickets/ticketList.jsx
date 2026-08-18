@@ -33,19 +33,13 @@ export default function TicketList() {
 
   const [stops, setStops] = useState([]);
 
+  const [selectedTickets, setSelectedTickets] = useState([]);
+
   const printRef = useRef();
 
   const handlePrint = useReactToPrint({
     contentRef: printRef,
   });
-
-  // const fetchLines = async (page = 1) => {
-  //   const response = await axios.get(`/api/lines?page=${page}&limit=10`);
-
-  //   setLines(response.data.data);
-  //   setCurrentPage(response.data.currentPage);
-  //   setTotalPages(response.data.totalPages);
-  // };
 
   const getSops = async () => {
     try {
@@ -53,6 +47,76 @@ export default function TicketList() {
       setStops(response.data.data);
     } catch (error) {
       console.error("Erreur lors de la récupération des arrêts :", error);
+    }
+  };
+
+  const handleSelectTicket = (id) => {
+    setSelectedTickets((prev) =>
+      prev.includes(id)
+        ? prev.filter((ticketId) => ticketId !== id)
+        : [...prev, id],
+    );
+  };
+
+  const handleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedTickets((prev) =>
+        prev.filter(
+          (id) => !filteredTickets.some((ticket) => ticket.id_ticket === id),
+        ),
+      );
+    } else {
+      setSelectedTickets((prev) => [
+        ...new Set([
+          ...prev,
+          ...filteredTickets.map((ticket) => ticket.id_ticket),
+        ]),
+      ]);
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedTickets.length === 0) return;
+
+    const result = await Swal.fire({
+      icon: "warning",
+      title: "Supprimer les tickets ?",
+      text: `Vous êtes sur le point de supprimer ${selectedTickets.length} ticket(s).`,
+      showCancelButton: true,
+      confirmButtonText: "Oui, supprimer",
+      cancelButtonText: "Annuler",
+      confirmButtonColor: "#d33",
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      await api.delete("/tickets", {
+        data: {
+          ids: selectedTickets,
+        },
+      });
+
+      Swal.fire({
+        icon: "success",
+        title: "Supprimé",
+        text: `${selectedTickets.length} ticket(s) supprimé(s) avec succès.`,
+        timer: 2000,
+        showConfirmButton: false,
+      });
+
+      setSelectedTickets([]);
+      getAllTickets(currentPage);
+    } catch (error) {
+      console.error("Erreur lors de la suppression :", error);
+
+      Swal.fire({
+        icon: "error",
+        title: "Erreur",
+        text:
+          error.response?.data?.error ||
+          "Impossible de supprimer les tickets sélectionnés.",
+      });
     }
   };
 
@@ -133,6 +197,16 @@ export default function TicketList() {
     return matchesSearch && matchesStatus;
   });
 
+  const isAllSelected =
+    filteredTickets.length > 0 &&
+    filteredTickets.every((ticket) =>
+      selectedTickets.includes(ticket.id_ticket),
+    );
+
+  const ticketsToPrint = filteredTickets.filter((ticket) =>
+    selectedTickets.includes(ticket.id_ticket),
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
@@ -163,18 +237,29 @@ export default function TicketList() {
         </div>
 
         <div className="flex items-center space-x-3 w-full lg:w-auto justify-end">
+          {selectedTickets.length > 0 && (
+            <button
+              onClick={handleDeleteSelected}
+              className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm transition-colors"
+            >
+              <Trash2 size={16} />
+              <span>Supprimer ({selectedTickets.length})</span>
+            </button>
+          )}
           {filteredTickets.length > 0 && (
             <button
-              onClick={handlePrint}
+              onClick={() => {
+                console.log("Tickets à imprimer :", ticketsToPrint);
+              }}
               className="flex items-center space-x-2 bg-gray-800 hover:bg-black text-white px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm transition-colors"
             >
               <Printer size={16} />
-              <span>Imprimer ({filteredTickets.length})</span>
+              <span>Imprimer ({selectedTickets.length})</span>
             </button>
           )}
 
           <button
-            onClick={handleGenerateTickets}
+            onClick={() => setIsModalOpen(true)}
             className="flex items-center space-x-2 bg-[#3B3B98] hover:bg-[#19193E] text-white px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm transition-colors"
           >
             <Plus size={16} />
@@ -182,10 +267,20 @@ export default function TicketList() {
           </button>
         </div>
       </div>
+
       <Table
         title="Registre des Tickets et Validation QR"
         headers={[
-          "#",
+          {
+            label: (
+              <input
+                type="checkbox"
+                checked={isAllSelected}
+                onChange={handleSelectAll}
+                className="w-4 h-4 accent-[#3B3B98] cursor-pointer"
+              />
+            ),
+          },
           "Token",
           "Arrêt Associé",
           "Date de création",
@@ -193,7 +288,6 @@ export default function TicketList() {
           "Date de validation",
           "Status",
           "Aperçu QR",
-          "Action",
         ]}
       >
         {filteredTickets.map((ticket, index) => (
@@ -201,9 +295,15 @@ export default function TicketList() {
             key={ticket.id_ticket}
             className="hover:bg-gray-50 transition-colors"
           >
-            <td className="px-6 py-4 font-mono font-bold text-xs text-[#3B3B98]">
-              {index + 1}
+            <td className="px-6 py-4">
+              <input
+                type="checkbox"
+                checked={selectedTickets.includes(ticket.id_ticket)}
+                onChange={() => handleSelectTicket(ticket.id_ticket)}
+                className="w-4 h-4 accent-[#3B3B98] cursor-pointer"
+              />
             </td>
+
             <td className="px-6 py-4 font-mono font-bold text-xs text-[#3B3B98]">
               {ticket.num_ticket}
             </td>
@@ -251,13 +351,13 @@ export default function TicketList() {
         ))}
       </Table>
 
-      {/* <div ref={printRef}>
-        <div className="grid grid-cols-2 gap-4">
-          {tickets.map((ticket) => (
+      <div ref={printRef} className="hidden">
+        <div className="grid grid-cols-2 gap-4 p-4">
+          {ticketsToPrint.map((ticket) => (
             <TicketCard key={ticket.id_ticket} ticket={ticket} />
           ))}
         </div>
-      </div> */}
+      </div>
 
       <Pagination
         currentPage={currentPage}

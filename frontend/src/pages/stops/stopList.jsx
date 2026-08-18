@@ -165,24 +165,24 @@ export default function StopList({ isModalOpen, setIsModalOpen }) {
               <td className="px-6 py-4 font-mono text-xs text-gray-400">
                 {stop.latitude}, {stop.longitude}
               </td>
-              <td className="px-6 py-4">
+              <td className="px-6 py-5 flex items-center gap-2">
                 <button
                   onClick={() => {
                     setIsEdit(true);
                     setStopForm(stop);
                     setId(stop.id_stop);
                   }}
-                  className="text-gray-500 p-2 mr-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="w-10 h-10 rounded-full border border-gray-200 hover:bg-indigo-50 hover:text-indigo-600 transition flex items-center justify-center cursor-pointer"
                 >
-                  <Edit2 size={16} />
+                  <Edit2 size={18} />
                 </button>
                 <button
                   onClick={() => {
                     handleDeleteStop(stop.id_stop);
                   }}
-                  className="text-red-500 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="w-10 h-10 rounded-full border border-gray-200 hover:bg-indigo-50 hover:text-red-600 transition flex items-center justify-center cursor-pointer"
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={18} />
                 </button>
               </td>
             </tr>
