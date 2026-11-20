@@ -179,14 +179,14 @@ export default function TrackingContent() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-3 bg-white rounded-2xl shadow-sm p-2 border border-gray-100 overflow-hidden h-[700px] z-10">
+        <div className="lg:col-span-3 bg-white rounded-2xl shadow-sm p-2 border border-gray-100 overflow-hidden h-175 z-10">
           <MapContainer
             center={fianaCenter}
             zoom={14}
             style={{ height: "100%", width: "100%", borderRadius: "0.75rem" }}
           >
             <TileLayer
-              url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+              url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=cb1_2i9j_1_59049f13600fe6074ed624c1"
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
             />
 

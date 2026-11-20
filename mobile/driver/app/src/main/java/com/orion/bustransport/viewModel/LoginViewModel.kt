@@ -14,6 +14,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.orion.bustransport.network.RetrofitClient
+import java.net.ConnectException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 
 class LoginViewModel(
     private val repository: AuthRepository,
@@ -33,6 +36,8 @@ class LoginViewModel(
         private set
     var errorMessage by mutableStateOf<String?>(null)
         private set
+    var isFatalError by mutableStateOf(false)
+        private set
 
     fun login(
         email:String,
@@ -42,6 +47,7 @@ class LoginViewModel(
         viewModelScope.launch {
             isLoading = true
             errorMessage = null
+            isFatalError = false
             try {
                 val response =
                     repository.login(
@@ -61,9 +67,13 @@ class LoginViewModel(
                     errorMessage =
                         "Identifiant ou mot de passe incorrect"
                 }
-            }catch(e:Exception){
-                errorMessage =
-                    e.message
+            } catch (e: Exception) {
+                val isConnectionError = e is ConnectException || 
+                                      e is UnknownHostException || 
+                                      e is SocketTimeoutException
+                
+                errorMessage = "Erreur de connexion: ${e.message}"
+                isFatalError = isConnectionError
             }
             isLoading=false
         }

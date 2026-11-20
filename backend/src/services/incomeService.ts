@@ -13,93 +13,93 @@ export class IncomeService {
     });
   }
 
-  async getIncomeByBus(bus_id: number) {
-    return await prisma.income.aggregate({
-      where: { bus_id: bus_id },
-      _sum: { amount: true },
+  async getIncomeByDriver(driver_id: any) {
+    const tickets = await prisma.ticket.findMany({
+      where: {
+        driver_id: Number(driver_id),
+      },
+      select: {
+        id_ticket: true,
+      },
     });
+
+    if (tickets.length === 0) {
+      return {
+        total_income: 0,
+      };
+    }
+
+    const ticketIds = tickets.map((ticket) => ticket.id_ticket);
+
+    const result = await prisma.income.aggregate({
+      where: {
+        ticket_id: {
+          in: ticketIds,
+        },
+      },
+      _sum: {
+        amount: true,
+      },
+    });
+
+    return {
+      total_income: result._sum.amount ?? 0,
+    };
   }
 
-  async filterIncomeByDate(bus_id: any) {
+  async getTotalIncome() {
+    const result = await prisma.income.aggregate({
+      _sum: {
+        amount: true,
+      },
+    });
+
+    return result._sum.amount ?? 0;
+  }
+
+  async filterIncomeByDate(bus_id: any, period: string) {
     const now = new Date();
 
-    const year = now.getFullYear();
-    const month = now.getMonth();
+    let startDate: Date;
+    let endDate: Date;
 
-    const startDate = new Date(year, month, 1);
-    const endDate = new Date(year, month + 1, 1);
+    if (period === "day") {
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-    // console.log("Bus ID:", bus_id);
+      endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    } else if (period === "month") {
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    // Cas "month"
-    if (bus_id === "month") {
-      const result = await prisma.income.aggregate({
-        where: {
-          date_in: {
-            gte: startDate,
-            lt: endDate,
-          },
-        },
-        _sum: {
-          amount: true,
-        },
-      });
-
-      return result._sum.amount ?? 0;
+      endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    } else {
+      throw new Error("Période invalide.");
     }
 
-    // Cas "day"
-    if (bus_id === "day") {
-      const today = new Date();
+    const where: any = {
+      date_in: {
+        gte: startDate,
+        lt: endDate,
+      },
+    };
 
-      const startOfDay = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate(),
-      );
+    if (bus_id !== undefined && bus_id !== null && bus_id !== "all") {
+      const busId = Number(bus_id);
 
-      const endOfDay = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate() + 1,
-      );
+      if (isNaN(busId)) {
+        throw new Error("ID du bus invalide.");
+      }
 
-      const result = await prisma.income.aggregate({
-        where: {
-          date_in: {
-            gte: startOfDay,
-            lt: endOfDay,
-          },
-        },
-        _sum: {
-          amount: true,
-        },
-      });
-
-      return result._sum.amount ?? 0;
+      where.bus_id = busId;
     }
 
-    // Cas bus_id
-    const busId = parseInt(bus_id);
+    const result = await prisma.income.aggregate({
+      where,
+      _sum: {
+        amount: true,
+      },
+    });
 
-    if (!isNaN(busId)) {
-      const result = await prisma.income.aggregate({
-        where: {
-          bus_id: busId,
-          date_in: {
-            gte: startDate,
-            lt: endDate,
-          },
-        },
-        _sum: {
-          amount: true,
-        },
-      });
-
-      return result._sum.amount ?? 0;
-    }
-
-    return 0;
+    return result._sum.amount ?? 0;
   }
 
   async updateIncome(id_income: number, data: any) {

@@ -79,49 +79,7 @@ export default function LineList({ isModalOpen, setIsModalOpen }) {
   //   fetchLines(currentPage);
   // }, [currentPage]);
 
-  const [lines, setLines] = useState([
-    // {
-    //   id_line: 1,
-    //   line_name: "Ligne 1",
-    //   description: "Trajet direct Université",
-    //   price: 600,
-    //   bus_id: 1,
-    //   route_path: [
-    //     [-21.443, 47.113],
-    //     [-21.451, 47.101],
-    //     [-21.459, 47.089],
-    //   ],
-    //   lineStops: [
-    //     {
-    //       order: 1,
-    //       stop: {
-    //         id_stop: 1,
-    //         name_stop: "Terminus Andrainjato",
-    //         latitude: "-21.4430",
-    //         longitude: "47.1130",
-    //       },
-    //     },
-    //     {
-    //       order: 2,
-    //       stop: {
-    //         id_stop: 2,
-    //         name_stop: "Arrêt Mahazengy",
-    //         latitude: "-21.4510",
-    //         longitude: "47.1010",
-    //       },
-    //     },
-    //     {
-    //       order: 3,
-    //       stop: {
-    //         id_stop: 3,
-    //         name_stop: "Terminus Anjoma",
-    //         latitude: "-21.4590",
-    //         longitude: "47.0890",
-    //       },
-    //     },
-    //   ],
-    // },
-  ]);
+  const [lines, setLines] = useState([]);
 
   const [lineForm, setLineForm] = useState({
     line_name: "",
@@ -180,14 +138,7 @@ export default function LineList({ isModalOpen, setIsModalOpen }) {
     <div className="space-y-6">
       <Table
         title="Réseau des lignes actives"
-        headers={[
-          "ID",
-          "Ligne",
-          "Description",
-          "Nombre d'arrêts",
-          "Tarif",
-          "Action",
-        ]}
+        headers={["ID", "Ligne", "Bus", "Description", "Tarif", "Action"]}
       >
         {lines.map((line) => (
           <tr key={line.id_line} className="hover:bg-gray-50">
@@ -195,12 +146,62 @@ export default function LineList({ isModalOpen, setIsModalOpen }) {
               #{line.id_line}
             </td>
             <td className="px-6 py-4 font-bold">{line.line_name}</td>
-            <td className="px-6 py-4 text-gray-500 text-xs">
+            <td className="px-6 py-5">
+              <div className="flex items-center gap-4">
+                {line.bus.image ? (
+                  <img
+                    src={`http://localhost:5000/uploads/${line.bus.image}`}
+                    alt={line.bus.modele}
+                    className="w-24 h-16 object-cover rounded-lg border border-gray-200 shadow-sm"
+                  />
+                ) : (
+                  <div className="w-24 h-16 rounded-lg border border-dashed border-gray-300 bg-gray-100 flex items-center justify-center">
+                    <ImagesIcon size={24} className="text-gray-400" />
+                  </div>
+                )}
+
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-gray-800">
+                      {line?.bus.modele}
+                    </span>
+                  </div>
+
+                  <span className="text-xs text-gray-500 mt-1">
+                    Immatriculation
+                  </span>
+
+                  <span className="inline-flex w-fit mt-1 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-md font-semibold">
+                    {line?.bus.registration}
+                  </span>
+                </div>
+              </div>
+            </td>
+            <td className="px-6 py-4 text-gray-500 font-bold">
               {line.description}
             </td>
-            <td className="px-6 py-4 font-medium text-gray-700">
-              {line.lineStops?.length || 0} arrêts
-            </td>
+            {/* <td className="px-6 py-4">
+              <div className="flex flex-col gap-2">
+        
+                <span className="font-semibold text-gray-500 ">
+                  {line.lineStops?.length || 0} arrêt
+                  {line.lineStops?.length > 1 ? "s" : ""}
+                </span>
+
+                <div className="flex flex-wrap gap-1.5">
+                  {line.lineStops
+                    ?.sort((a, b) => a.order - b.order)
+                    .map((lineStop) => (
+                      <span
+                        key={lineStop.id_line_stop}
+                        className="inline-flex items-center px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium"
+                      >
+                        {lineStop.stop?.name_stop}
+                      </span>
+                    ))}
+                </div>
+              </div>
+            </td> */}
             <td className="px-6 py-4 font-bold text-gray-800">
               {line.price.toLocaleString("fr-FR", {
                 minimumFractionDigits: 2,

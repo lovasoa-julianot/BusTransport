@@ -37,6 +37,8 @@ export default function TicketList() {
 
   const printRef = useRef();
 
+  const [selectedQR, setSelectedQR] = useState(null);
+
   const handlePrint = useReactToPrint({
     contentRef: printRef,
   });
@@ -190,10 +192,12 @@ export default function TicketList() {
 
   const filteredTickets = tickets.filter((t) => {
     const matchesSearch =
-      t.stop.name_stop.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.id_ticket.toLowerCase().includes(searchQuery.toLowerCase());
+      t.stop?.name_stop?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.id_ticket?.toString().toLowerCase().includes(searchQuery.toLowerCase());
+
     const matchesStatus =
       statusFilter === "" || t.status_ticket === statusFilter;
+
     return matchesSearch && matchesStatus;
   });
 
@@ -230,8 +234,9 @@ export default function TicketList() {
               className="w-full bg-gray-50 border border-gray-200 pl-10 pr-4 py-2 rounded-lg text-sm outline-none focus:border-[#3B3B98] focus:bg-white transition-colors appearance-none font-medium"
             >
               <option value="">Tous les statuts</option>
-              <option value="Disponible">Disponible</option>
-              <option value="Scanné">Scanné</option>
+              <option value="UNUSED">Disponible</option>
+              <option value="USED">Scanné</option>
+              <option value="EXPIRED">Expiré</option>
             </select>
           </div>
         </div>
@@ -248,10 +253,9 @@ export default function TicketList() {
           )}
           {filteredTickets.length > 0 && (
             <button
-              onClick={() => {
-                console.log("Tickets à imprimer :", ticketsToPrint);
-              }}
-              className="flex items-center space-x-2 bg-gray-800 hover:bg-black text-white px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm transition-colors"
+              onClick={handlePrint}
+              disabled={selectedTickets.length === 0}
+              className="flex items-center space-x-2 bg-gray-800 hover:bg-black disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm transition-colors"
             >
               <Printer size={16} />
               <span>Imprimer ({selectedTickets.length})</span>
@@ -290,68 +294,81 @@ export default function TicketList() {
           "Aperçu QR",
         ]}
       >
-        {filteredTickets.map((ticket, index) => (
-          <tr
-            key={ticket.id_ticket}
-            className="hover:bg-gray-50 transition-colors"
-          >
-            <td className="px-6 py-4">
-              <input
-                type="checkbox"
-                checked={selectedTickets.includes(ticket.id_ticket)}
-                onChange={() => handleSelectTicket(ticket.id_ticket)}
-                className="w-4 h-4 accent-[#3B3B98] cursor-pointer"
-              />
-            </td>
-
-            <td className="px-6 py-4 font-mono font-bold text-xs text-[#3B3B98]">
-              {ticket.num_ticket}
-            </td>
-            <td className="px-6 py-4 font-semibold text-gray-800">
-              {ticket.stop.name_stop}
-            </td>
-            <td className="px-6 py-4 text-xs font-mono text-gray-400">
-              {ticket.created_at}
-            </td>
-            <td className="px-6 py-4 text-xs font-mono text-gray-400">
-              {ticket.expired_at}
-            </td>
-            <td className="px-6 py-4 text-xs font-mono text-gray-400">
-              {ticket.used_at || "Non validé"}
-            </td>
-            <td className="px-6 py-4">
-              {ticket.status_ticket === "AVAILABLE" && (
-                <span className="text-[10px] px-2.5 py-1 rounded-full font-bold inline-flex items-center bg-green-100 text-green-700">
-                  VALABLE
-                </span>
-              )}
-              {ticket.status_ticket === "USED" && (
-                <span className="text-[10px] px-2.5 py-1 rounded-full font-bold inline-flex items-center bg-gray-100 text-gray-400 line-through">
-                  SCANNÉ
-                </span>
-              )}
-              {ticket.status_ticket === "EXPIRED" && (
-                <span className="text-[10px] px-2.5 py-1 rounded-full font-bold inline-flex items-center bg-gray-100 text-red-400">
-                  {ticket.status_ticket}
-                </span>
-              )}
-            </td>
-            <td className="px-6 py-2 text-center">
-              <div className="bg-white p-2 rounded-lg border inline-flex">
-                <QRCode
-                  value={ticket.qr_code}
-                  size={70}
-                  bgColor="#FFFFFF"
-                  fgColor="#000000"
-                  level="H"
+        {filteredTickets.length > 0 ? (
+          filteredTickets.map((ticket, index) => (
+            <tr
+              key={ticket.id_ticket}
+              className="hover:bg-gray-50 transition-colors"
+            >
+              <td className="px-6 py-4">
+                <input
+                  type="checkbox"
+                  checked={selectedTickets.includes(ticket.id_ticket)}
+                  onChange={() => handleSelectTicket(ticket.id_ticket)}
+                  className="w-4 h-4 accent-[#3B3B98] cursor-pointer"
                 />
-              </div>
+              </td>
+
+              <td className="px-6 py-4 font-mono font-bold text-xs text-[#3B3B98]">
+                {ticket.num_ticket}
+              </td>
+              <td className="px-6 py-4 font-semibold text-gray-800">
+                {ticket.stop.name_stop}
+              </td>
+              <td className="px-6 py-4 text-xs font-mono text-gray-400">
+                {ticket.created_at}
+              </td>
+              <td className="px-6 py-4 text-xs font-mono text-gray-400">
+                {ticket.expired_at}
+              </td>
+              <td className="px-6 py-4 text-xs font-mono text-gray-400">
+                {ticket.used_at || "Non validé"}
+              </td>
+              <td className="px-6 py-4">
+                {ticket.status_ticket === "UNUSED" && (
+                  <span className="text-[10px] px-2.5 py-1 rounded-full font-bold inline-flex items-center bg-green-100 text-green-700">
+                    DISPONIBLE
+                  </span>
+                )}
+                {ticket.status_ticket === "USED" && (
+                  <span className="text-[10px] px-2.5 py-1 rounded-full font-bold inline-flex items-center bg-gray-100 text-gray-400 line-through">
+                    SCANNÉ
+                  </span>
+                )}
+                {ticket.status_ticket === "EXPIRED" && (
+                  <span className="text-[10px] px-2.5 py-1 rounded-full font-bold inline-flex items-center bg-gray-100 text-red-400">
+                    EXPIRE
+                  </span>
+                )}
+              </td>
+              <td className="px-6 py-2 text-center">
+                <button
+                  type="button"
+                  onClick={() => setSelectedQR(ticket.qr_code)}
+                  className="bg-white p-2 rounded-lg border inline-flex cursor-pointer hover:shadow-md hover:scale-105 transition"
+                  title="Agrandir le QR Code"
+                >
+                  <QRCode
+                    value={ticket.qr_code}
+                    size={70}
+                    bgColor="#FFFFFF"
+                    fgColor="#000000"
+                    level="H"
+                  />
+                </button>
+              </td>
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td colSpan="8" className="text-center py-4 text-gray-500">
+              Aucun ticket trouvé.
             </td>
           </tr>
-        ))}
+        )}
       </Table>
 
-      <div ref={printRef} className="hidden">
+      <div ref={printRef} className="print-container">
         <div className="grid grid-cols-2 gap-4 p-4">
           {ticketsToPrint.map((ticket) => (
             <TicketCard key={ticket.id_ticket} ticket={ticket} />
@@ -385,6 +402,48 @@ export default function TicketList() {
           isModalOpen={isModalOpen}
           setIsModalOpen={setIsModalOpen}
         />
+      )}
+
+      {selectedQR && (
+        <div
+          className="fixed inset-0 z-60 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          onClick={() => setSelectedQR(null)}
+        >
+          <div
+            className="relative bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Bouton fermer */}
+            <button
+              type="button"
+              onClick={() => setSelectedQR(null)}
+              className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 text-xl"
+            >
+              ×
+            </button>
+
+            <h3 className="text-lg font-semibold text-gray-800 text-center mb-4">
+              QR Code du ticket
+            </h3>
+
+            {/* QR Code agrandi */}
+            <div className="flex justify-center">
+              <div className="bg-white p-4 rounded-xl border">
+                <QRCode
+                  value={selectedQR}
+                  size={300}
+                  bgColor="#FFFFFF"
+                  fgColor="#000000"
+                  level="H"
+                />
+              </div>
+            </div>
+
+            <p className="text-sm text-gray-500 text-center mt-4">
+              Scannez ce QR Code avec l'application mobile
+            </p>
+          </div>
+        </div>
       )}
     </div>
   );

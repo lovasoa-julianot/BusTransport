@@ -5,20 +5,20 @@ import retrofit2.http.Body
 import retrofit2.http.*
 
 interface ApiService {
-    @POST("api/auth/login")
+    @POST("auth/login")
     suspend fun login(
         @Body request: LoginRequest
     ): Response<LoginResponse>
 
-    @GET("api/users/me")
+    @GET("users/me")
     suspend fun getProfile(
     ): Response<UserResponse>
 
-    @GET("api/tickets/driver")
+    @GET("tickets/driver")
     suspend fun getTodayTickets(
     ): Response<TicketResponse>
 
-    @POST("api/tickets/scan")
+    @POST("tickets/scan")
     suspend fun validateTicket(
         @Body request: ScanRequest
     ): Response<ScanResponse>

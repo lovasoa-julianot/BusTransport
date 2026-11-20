@@ -3,7 +3,10 @@ package com.orion.madatransit.screen
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Paint
+import android.util.Log
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -37,6 +41,7 @@ import com.google.android.gms.location.Priority
 import com.orion.madatransit.components.BusStopRowItem
 import com.orion.madatransit.components.SelectedStopBanner
 import com.orion.madatransit.model.BusStop
+import com.orion.madatransit.model.NominatimResult
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -66,6 +71,7 @@ fun MainHomeScreen(
 
     val stops by viewModel.stops.collectAsStateWithLifecycle()
     val allLinePaths by viewModel.linePaths.collectAsStateWithLifecycle()
+    val itineraries by viewModel.itineraries.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
 
     // Permisssions handling
@@ -79,23 +85,30 @@ fun MainHomeScreen(
     // Configuration d'OSM
     Configuration.getInstance().load(context, context.getSharedPreferences("osm_pref", Context.MODE_PRIVATE))
 
-    var searchQuery by remember { mutableStateOf("") }
+    val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
+    val suggestions by viewModel.suggestions.collectAsStateWithLifecycle()
     var selectedStop by remember { mutableStateOf<BusStop?>(null) }
+    var selectedItinerary by remember { mutableStateOf<com.orion.madatransit.model.Itinerary?>(null) }
     
     // Default position if permission is denied
     val defaultPosition = GeoPoint(-21.4536, 47.0858)
     var userPosition by remember { mutableStateOf<GeoPoint?>(null) }
     var mapView by remember { mutableStateOf<MapView?>(null) }
 
-    // Use fetched road path based on selected line if available
-    val roadPath = remember(selectedStop, allLinePaths) {
-        val currentStop = selectedStop
-        if (currentStop != null) {
-            // Find path for one of the lines of the selected stop
-            val line = currentStop.availableLines.split(",").firstOrNull()?.trim()
-            allLinePaths[line] ?: emptyList()
+    // Use fetched road path based on selected line or itinerary if available
+    val roadPath = remember(selectedStop, selectedItinerary, allLinePaths) {
+        val itinerary = selectedItinerary
+        if (itinerary != null) {
+            itinerary.path
         } else {
-            emptyList()
+            val currentStop = selectedStop
+            if (currentStop != null) {
+                // Find path for one of the lines of the selected stop
+                val line = currentStop.availableLines.split(",").firstOrNull()?.trim()
+                allLinePaths[line] ?: emptyList()
+            } else {
+                emptyList()
+            }
         }
     }
     LaunchedEffect(locationPermissionsState.allPermissionsGranted) {
@@ -153,12 +166,22 @@ fun MainHomeScreen(
                 selectedStop = selectedStop,
                 filteredStops = filteredStops,
                 recommendedStop = recommendedStop,
+                itineraries = itineraries,
+                selectedItinerary = selectedItinerary,
                 primaryColor = primaryColor,
                 onStopSelected = { stop ->
                     selectedStop = stop
+                    selectedItinerary = null
+                    viewModel.calculateItineraries(userPosition ?: defaultPosition, stop)
                     mapView?.controller?.animateTo(stop.location)
                 },
-                onCloseBanner = { selectedStop = null },
+                onItinerarySelected = { itinerary ->
+                    selectedItinerary = itinerary
+                },
+                onCloseBanner = { 
+                    selectedStop = null
+                    selectedItinerary = null
+                },
                 onNavigate = onNavigateToItinerary
             )
         }
@@ -167,12 +190,32 @@ fun MainHomeScreen(
             innerPadding = innerPadding,
             primaryColor = primaryColor,
             searchQuery = searchQuery,
-            onSearchChange = { searchQuery = it },
+            suggestions = suggestions,
+            onSearchChange = { query ->
+                viewModel.onSearchChange(query)
+                if (query.isNotEmpty()) {
+                    selectedStop = null
+                }
+            },
+            onSuggestionClick = { result ->
+                val lat = result.lat.toDoubleOrNull()
+                val lon = result.lon.toDoubleOrNull()
+                if (lat != null && lon != null) {
+                    val point = GeoPoint(lat, lon)
+                    mapView?.controller?.animateTo(point)
+                    mapView?.controller?.setZoom(16.0)
+                    
+                    // Clear search and suggestions after selection
+                    viewModel.onSearchChange("") 
+                }
+            },
+
             userPosition = effectiveUserPosition,
             isLocationKnown = userPosition != null,
             filteredStops = filteredStops,
             roadPath = roadPath,
             selectedStop = selectedStop,
+            selectedItinerary = selectedItinerary,
             onStopSelected = { selectedStop = it },
             mapView = mapView,
             onMapViewReady = { mapView = it },
@@ -186,8 +229,11 @@ fun BottomSheetContent(
     selectedStop: BusStop?,
     filteredStops: List<BusStop>,
     recommendedStop: BusStop?,
+    itineraries: List<com.orion.madatransit.model.Itinerary>,
+    selectedItinerary: com.orion.madatransit.model.Itinerary?,
     primaryColor: Color,
     onStopSelected: (BusStop) -> Unit,
+    onItinerarySelected: (com.orion.madatransit.model.Itinerary) -> Unit,
     onCloseBanner: () -> Unit,
     onNavigate: (String) -> Unit
 ) {
@@ -203,6 +249,33 @@ fun BottomSheetContent(
                 onClose = onCloseBanner,
                 onGoToItinerary = { onNavigate(selectedStop.name) }
             )
+            
+            if (itineraries.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Itinéraires suggérés",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.heightIn(max = 240.dp)
+                ) {
+                    items(itineraries) { itinerary ->
+                        val isSelected = selectedItinerary == itinerary
+                        ItineraryRowItem(
+                            itinerary = itinerary,
+                            isSelected = isSelected,
+                            primaryColor = primaryColor,
+                            onClick = { onItinerarySelected(itinerary) }
+                        )
+                    }
+                }
+            } else {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Aucun itinéraire direct trouvé", fontSize = 12.sp, color = Color.Gray)
+            }
         } else {
             if (recommendedStop != null && filteredStops.contains(recommendedStop)) {
                 RecommendationCard(recommendedStop, primaryColor) { onStopSelected(recommendedStop) }
@@ -236,6 +309,80 @@ fun BottomSheetContent(
                         onClick = { onStopSelected(stop) }
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun ItineraryRowItem(
+    itinerary: com.orion.madatransit.model.Itinerary,
+    isSelected: Boolean,
+    primaryColor: Color,
+    onClick: () -> Unit
+) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) primaryColor.copy(alpha = 0.12f) else Color.White
+        ),
+        elevation = if (isSelected) CardDefaults.cardElevation(defaultElevation = 0.dp) else CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = if (isSelected) BorderStroke(2.dp, primaryColor) else BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.5f))
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Surface(
+                        color = primaryColor,
+                        shape = RoundedCornerShape(4.dp)
+                    ) {
+                        Text(
+                            text = itinerary.lineName,
+                            color = Color.White,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = when(itinerary.category) {
+                            "Rapid" -> "Rapide"
+                            "Average" -> "Moyenne"
+                            else -> "Long"
+                        },
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = when(itinerary.category) {
+                            "Rapid" -> Color(0xFF2E7D32)
+                            "Average" -> Color(0xFFEF6C00)
+                            else -> Color(0xFFC62828)
+                        }
+                    )
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "De ${itinerary.fromStopName}",
+                    fontSize = 13.sp,
+                    color = Color.DarkGray
+                )
+                Text(
+                    text = "${itinerary.stopCount} arrêts • ${itinerary.durationEstimated}",
+                    fontSize = 12.sp,
+                    color = Color.Gray
+                )
+            }
+            Column(horizontalAlignment = Alignment.End) {
+                Icon(
+                    imageVector = if (isSelected) Icons.Default.Check else Icons.Default.ArrowForward,
+                    contentDescription = null,
+                    tint = if (isSelected) primaryColor else Color.LightGray
+                )
             }
         }
     }
@@ -277,12 +424,15 @@ fun MainContent(
     innerPadding: PaddingValues,
     primaryColor: Color,
     searchQuery: String,
+    suggestions: List<NominatimResult>,
+    onSuggestionClick: (NominatimResult) -> Unit,
     onSearchChange: (String) -> Unit,
     userPosition: GeoPoint,
     isLocationKnown: Boolean,
     filteredStops: List<BusStop>,
     roadPath: List<GeoPoint>,
     selectedStop: BusStop?,
+    selectedItinerary: com.orion.madatransit.model.Itinerary?,
     onStopSelected: (BusStop) -> Unit,
     mapView: MapView?,
     onMapViewReady: (MapView) -> Unit,
@@ -352,6 +502,14 @@ fun MainContent(
                     val marker = Marker(view)
                     marker.position = stop.location
                     marker.title = stop.name
+                    
+                    val isStartOfItinerary = selectedItinerary?.fromStopName == stop.name
+                    if (isStartOfItinerary) {
+                        marker.icon = view.context.getDrawable(android.R.drawable.ic_dialog_map)?.apply {
+                            setTint(android.graphics.Color.GREEN)
+                        }
+                    }
+
                     marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                     marker.setOnMarkerClickListener { m, _ ->
                         onStopSelected(stop)
@@ -370,7 +528,7 @@ fun MainContent(
                 .statusBarsPadding()
                 .padding(16.dp)
         ) {
-            HeaderSection(primaryColor, searchQuery, onSearchChange, isLocationKnown)
+            HeaderSection(primaryColor, searchQuery, suggestions, onSearchChange, onSuggestionClick, isLocationKnown)
         }
 
         FloatingActionButton(
@@ -390,39 +548,104 @@ fun MainContent(
 }
 
 @Composable
-fun HeaderSection(primaryColor: Color, searchQuery: String, onSearchChange: (String) -> Unit, isLocationKnown: Boolean) {
+fun HeaderSection(
+    primaryColor: Color,
+    searchQuery: String,
+    suggestions: List<NominatimResult>,
+    onSearchChange: (String) -> Unit,
+    onSuggestionClick: (NominatimResult) -> Unit,
+    isLocationKnown: Boolean
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 8.dp
+        )
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
-        ) {
-            Icon(
-                Icons.Default.Search, 
-                contentDescription = null, 
-                tint = if (isLocationKnown) primaryColor else Color.Gray
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            TextField(
-                value = searchQuery,
-                onValueChange = onSearchChange,
-                placeholder = { Text("Où allez-vous ?", fontSize = 16.sp, color = Color.Gray) },
-                singleLine = true,
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    focusedTextColor = Color.Gray,
-                    unfocusedTextColor = Color.Gray,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                modifier = Modifier.weight(1f)
-            )
+        Column {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(
+                    horizontal = 12.dp,
+                    vertical = 4.dp
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = null,
+                    tint = if (isLocationKnown) {
+                        primaryColor
+                    } else {
+                        Color.Gray
+                    }
+                )
+                Spacer( modifier = Modifier.width(8.dp) )
+                TextField(
+                    value = searchQuery,
+                    onValueChange = onSearchChange,
+                    placeholder = {
+                        Text(
+                            "Où allez-vous ?",
+                            fontSize = 16.sp,
+                            color = Color.Gray
+                        )
+                    },
+                    singleLine = true,
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        focusedTextColor = Color.Black,
+                        unfocusedTextColor = Color.DarkGray,
+                        unfocusedIndicatorColor = Color.Transparent
+                    ),
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Search
+                    ),
+                    modifier = Modifier.weight(1f)
+                )
+                if (searchQuery.isNotEmpty()) {
+                    IconButton(onClick = { onSearchChange("") }) {
+                        Icon(Icons.Default.Close, contentDescription = "Clear", tint = Color.Gray)
+                    }
+                }
+            }
+
+            // Suggestions
+            if (suggestions.isNotEmpty()) {
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 12.dp), thickness = 0.5.dp, color = Color.LightGray)
+
+                Column(modifier = Modifier.heightIn(max = 300.dp)) {
+                    suggestions.forEach { suggestion ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onSuggestionClick(suggestion) }
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.LocationOn,
+                                contentDescription = null,
+                                tint = primaryColor.copy(alpha = 0.7f),
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = suggestion.displayName ?: "Lieu inconnu",
+                                fontSize = 14.sp,
+                                color = Color.DarkGray,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }

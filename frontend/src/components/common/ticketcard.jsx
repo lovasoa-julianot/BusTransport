@@ -8,7 +8,6 @@ export default function TicketCard({ ticket }) {
 
         <p className="text-blue-700 text-xl font-bold">{ticket.num_ticket}</p>
 
-        
         <p className="text-[10px] text-gray-500">
           EXP : {new Date(ticket.expired_at).toLocaleString()}
         </p>

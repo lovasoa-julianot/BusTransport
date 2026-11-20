@@ -1,30 +1,30 @@
 package com.orion.bustransport.screen
 
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Place
+import android.app.Activity
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.orion.bustransport.network.RetrofitClient
-//import androidx.compose.platform.LocalContext
 import com.orion.bustransport.utils.TextToSpeechManager
 import com.orion.bustransport.viewModel.DriverViewModel
-import kotlinx.coroutines.selects.whileSelect
+import com.orion.bustransport.R
+import com.orion.bustransport.network.User
+import com.orion.bustransport.components.ErrorSplashScreen
 
-sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
-    object Scan : Screen("scan", "Scanner", Icons.Default.Done)
-    object Revenue : Screen("revenue", "Revenus", Icons.Default.Place)
-    object Profile : Screen("profile", "Profil", Icons.Default.Person)
+sealed class Screen(val route: String, val title: String, val icon: Int) {
+    object Scan : Screen("scan", "Scanner", R.drawable.code)
+    object Revenue : Screen("revenue", "Revenus", R.drawable.income)
+    object Profile : Screen("profile", "Profil", R.drawable.user)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,6 +36,13 @@ fun MainDriverScreen(driverName: String, onLogout: () -> Unit) {
     val viewModel: DriverViewModel = viewModel(factory = DriverViewModel.Factory)
     val uiState = viewModel.uiState
 
+    if (uiState.isFatalError) {
+        ErrorSplashScreen(
+            errorMessage = uiState.error ?: "Impossible de contacter le serveur. L'application va se fermer.",
+            onExit = { (context as? Activity)?.finish() }
+        )
+        return // Stop rendering the rest of the screen
+    }
 
     val items = listOf(Screen.Scan, Screen.Revenue, Screen.Profile)
     val ttsManager = remember { TextToSpeechManager(context) }
@@ -66,7 +73,20 @@ fun MainDriverScreen(driverName: String, onLogout: () -> Unit) {
             ) {
                 items.forEach { screen ->
                     NavigationBarItem(
-                        icon = { Icon(screen.icon, contentDescription = screen.title) },
+                        icon = {
+                            Image(
+                                painter = painterResource(id = screen.icon),
+                                contentDescription = screen.title,
+                                modifier = Modifier.size(24.dp),
+                                colorFilter = ColorFilter.tint(
+                                    if (currentScreen == screen) {
+                                        Color(0xFF00B29A)
+                                    } else {
+                                        Color.Gray
+                                    }
+                                )
+                            )
+                        },
                         label = {
                             Text(
                                 text = screen.title,
@@ -80,11 +100,8 @@ fun MainDriverScreen(driverName: String, onLogout: () -> Unit) {
                         selected = currentScreen == screen,
                         onClick = { currentScreen = screen },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = Color(0xFF00B29A),
-
                             selectedTextColor = Color(0xFF00B29A),
                             indicatorColor = Color(0xFFEAEAEA),
-                            unselectedIconColor = Color.Gray,
                             unselectedTextColor = Color.Gray
                         )
                     )
@@ -98,20 +115,37 @@ fun MainDriverScreen(driverName: String, onLogout: () -> Unit) {
         ) {
             when (currentScreen) {
                 is Screen.Scan -> {
-                    ScanScreen(
-                        driverName = uiState.user?.username ?: "N/A",
-                        scanResult = uiState.scanResult,
-                        onTokenScanned = {
-                            viewModel.scanTicket(it)
+                    if (uiState.loading) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(color = Color(0xFF00B29A))
                         }
-                    )
+                    } else if (uiState.user != null) {
+                        ScanScreen(
+                            user = uiState.user,
+                            driverName = uiState.user.username,
+                            scanResult = uiState.scanResult,
+                            scanResultId = uiState.scanResultId,
+                            onTokenScanned = {
+                                viewModel.scanTicket(it)
+                            },
+                            onClearScanResult = {
+                                viewModel.clearScanResult()
+                            },
+                            imageBaseUrl = RetrofitClient.getBaseURL()
+                        )
+                    }
                 }
                 is Screen.Revenue -> {
-                    RevenueScreen(
-                        totalTicketsScanned = uiState.totalTickets,
-                        ticketPriceMGA = 2000,
-                        tickets = uiState.tickets
-                    )
+                    uiState.user?.let {
+                        RevenueScreen(
+                            totalTicketsScanned = uiState.totalTickets,
+                            ticketPriceMGA = 2000,
+                            tickets = uiState.tickets
+                        )
+                    }
                 }
                 else -> {
                     uiState.user?.let {

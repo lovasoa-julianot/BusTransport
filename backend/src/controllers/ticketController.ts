@@ -29,6 +29,29 @@ export class TicketController {
     }
   }
 
+  async getTopDrivers(req: AuthenticatedRequest, res: Response) {
+    try {
+      const limit = parseInt(req.query.limit as string) || 25;
+
+      const result = await ticketService.getTopDriversByTicketsSold(limit);
+
+      res.status(200).json({
+        success: true,
+        data: result,
+      });
+    } catch (error: any) {
+      console.error(
+        "Erreur lors de la récupération des meilleurs conducteurs :",
+        error.message,
+      );
+
+      res.status(500).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  }
+
   async getTicketByDriver(req: AuthenticatedRequest, res: Response) {
     try {
       const id = req.user?.id_user;

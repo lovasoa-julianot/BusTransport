@@ -42,7 +42,10 @@ data class DriverUiState(
     val user: User? = null,
     val tickets: List<Ticket> = emptyList(),
     val totalTickets: Int = 0,
-    val scanResult: Pair<Boolean, String>? = null
+    val scanResult: Pair<Boolean, String>? = null,
+    val scanResultId: Long = 0L,
+    val error: String? = null,
+    val isFatalError: Boolean = false
 )
 
 data class LoginRequest(

@@ -22,21 +22,13 @@ const amountFormat = (amount) => {
 
 export default function DashboardContent({ search = "" }) {
   const [timeFilter, setTimeFilter] = useState("month");
-  const [selectedBusFilter, setSelectedBusFilter] = useState("");
+  const [selectedBusFilter, setSelectedBusFilter] = useState("all");
   const [amountTotal, setAmountTotal] = useState("");
   const [amountTotalBus, setAmountTotalBus] = useState("");
 
   const [workingbus, setWorkingBus] = useState([]);
 
-  const topDrivers = [
-    {
-      id: 1,
-      name: "Jean-Noël",
-      trips: 142,
-      avatar:
-        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150",
-    },
-  ];
+  const [topDrivers, setTopDrivers] = useState([]);
 
   const chartData = [
     { name: "Jan", revenue: 4500000 },
@@ -47,20 +39,30 @@ export default function DashboardContent({ search = "" }) {
     { name: "Juin", revenue: 7100000 },
   ];
 
+  const getTopDrivers = async () => {
+    try {
+      const response = await api.get("/tickets/drivers?limit=50");
+      if (response.data && response.data.data) {
+        setTopDrivers(response.data.data);
+      }
+    } catch (error) {
+      console.error("Erreur lors de la récupération des top drivers :", error);
+    }
+  };
+
   const getActiveBuses = async () => {
     try {
       const response = await api.get("/buses");
-      console.log("Buses: ", response.data.data);
       setWorkingBus(response.data.data);
     } catch (error) {
       console.error("Erreur lors de la récupération des arrêts :", error);
     }
   };
 
-  const getAmountTotal = async (mode) => {
+  const getAmountTotal = async () => {
     try {
-      const response = await api.get(`/income/${mode}`);
-      const sum = response.data.data.amount;
+      const response = await api.get(`/income/total`);
+      const sum = response.data.data.total_income;
       setAmountTotal(sum);
     } catch (error) {
       console.error(
@@ -70,9 +72,9 @@ export default function DashboardContent({ search = "" }) {
     }
   };
 
-  const filterAmountByBus = async (id) => {
+  const filterAmountByBusAndPeriod = async (id, period) => {
     try {
-      const response = await api.get(`/income/${id}`);
+      const response = await api.get(`/income?id=${id}&period=${period}`);
       const sum = response.data.data.amount;
       setAmountTotalBus(sum);
     } catch (error) {
@@ -89,24 +91,16 @@ export default function DashboardContent({ search = "" }) {
 
   useEffect(() => {
     getActiveBuses();
+    getTopDrivers();
   }, []);
 
   useEffect(() => {
-    filterAmountByBus(selectedBusFilter);
-  }, [selectedBusFilter]);
+    filterAmountByBusAndPeriod(selectedBusFilter, timeFilter);
+  }, [selectedBusFilter, timeFilter]);
 
   useEffect(() => {
-    getAmountTotal(timeFilter);
-  }, [timeFilter]);
-
-  const totalRevenueCompany = "33,800,000 Ar";
-
-  const getDynamicRevenue = () => {
-    if (selectedBusFilter !== "all") {
-      return timeFilter === "day" ? "85,000 Ar" : "1,950,000 Ar";
-    }
-    return timeFilter === "day" ? "320,000 Ar" : "7,100,000 Ar";
-  };
+    getAmountTotal();
+  }, []);
 
   const filteredBuses = workingbus.filter((bus) =>
     bus.registration.toLowerCase().includes(search.toLowerCase()),
@@ -126,7 +120,9 @@ export default function DashboardContent({ search = "" }) {
             onChange={(e) => setTimeFilter(e.target.value)}
             className="bg-[#EAEAEA] text-sm text-gray-700 font-medium px-4 py-2 rounded-lg outline-none cursor-pointer border border-transparent focus:border-[#3B3B98]"
           >
-            <option value="day">Aujourd'hui (Jour)</option>
+            <option value="day" selected>
+              Aujourd'hui (Jour)
+            </option>
             <option value="month">Ce Mois-ci</option>
           </select>
 
@@ -135,7 +131,9 @@ export default function DashboardContent({ search = "" }) {
             onChange={(e) => setSelectedBusFilter(e.target.value)}
             className="bg-[#EAEAEA] text-sm text-gray-700 font-medium px-4 py-2 rounded-lg outline-none cursor-pointer border border-transparent focus:border-[#3B3B98]"
           >
-            <option value="all">Tous les Bus</option>
+            <option value="all" selected>
+              Tous les Bus
+            </option>
             {workingbus.map((bus) => (
               <option key={bus.id_bus} value={bus.id_bus}>
                 {bus.registration}
@@ -317,7 +315,7 @@ export default function DashboardContent({ search = "" }) {
             <div className="p-4 space-y-3">
               {topDrivers.map((driver, index) => (
                 <div
-                  key={driver.id}
+                  key={driver.driver_id}
                   className="bg-white p-3 rounded-xl flex items-center justify-between shadow-sm hover:translate-x-1 transition-transform"
                 >
                   <div className="flex items-center space-x-4">
@@ -327,22 +325,22 @@ export default function DashboardContent({ search = "" }) {
                       {index + 1}
                     </span>
                     <img
-                      src={driver.avatar}
-                      alt={driver.name}
+                      src={`http://localhost:5000/uploads/${driver.photos}`}
+                      alt={driver.lname}
                       className="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
                     />
                     <div>
                       <h4 className="text-sm font-bold text-gray-800">
-                        {driver.name}
+                        {driver.fname} {driver.lname}
                       </h4>
-                      <p className="text-[11px] text-gray-400">
+                      {/* <p className="text-[11px] text-gray-400">
                         Chauffeur agréé
-                      </p>
+                      </p> */}
                     </div>
                   </div>
                   <div className="text-right">
                     <span className="text-xs font-black text-[#FFC107] block">
-                      {driver.trips}
+                      {driver.tickets_sold}
                     </span>
                     <span className="text-[10px] text-gray-400">tickets</span>
                   </div>

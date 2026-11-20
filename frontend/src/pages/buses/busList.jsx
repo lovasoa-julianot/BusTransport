@@ -147,7 +147,7 @@ export default function BusList({ isModalOpen, setIsModalOpen }) {
     <div className="space-y-6">
       <Table
         title="Flotte des Bus enregistrés"
-        headers={["#", "Bus", "Chauffeur", "Capacité", "Statut", "Action"]}
+        headers={["Bus", "Chauffeur", "Capacité", "Statut", "Action"]}
       >
         {buses.length > 0 ? (
           buses.map((bus, index) => (
@@ -155,9 +155,9 @@ export default function BusList({ isModalOpen, setIsModalOpen }) {
               key={bus.id_bus}
               className="hover:bg-gray-50 transition-colors border-b border-gray-100"
             >
-              <td className="px-6 py-5 text-gray-700 font-medium">
+              {/* <td className="px-6 py-5 text-gray-700 font-medium">
                 {index + 1}
-              </td>
+              </td> */}
 
               <td className="px-6 py-5">
                 <div className="flex items-center gap-4">

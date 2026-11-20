@@ -28,6 +28,58 @@ export class TicketService {
     };
   }
 
+  async getTopDriversByTicketsSold(limit: number) {
+    // Récupérer uniquement les utilisateurs ayant le rôle Driver
+    const drivers = await prisma.user.findMany({
+      where: {
+        role: "Driver",
+      },
+      select: {
+        id_user: true,
+        f_name: true,
+        l_name: true,
+        photo: true,
+      },
+    });
+
+    const driverIds = drivers.map((driver) => driver.id_user);
+
+    if (driverIds.length === 0) {
+      return [];
+    }
+
+    // Compter uniquement les tickets appartenant aux vrais Drivers
+    const topDrivers = await prisma.ticket.groupBy({
+      by: ["driver_id"],
+      where: {
+        driver_id: {
+          in: driverIds,
+        },
+      },
+      _count: {
+        id_ticket: true,
+      },
+      orderBy: {
+        _count: {
+          id_ticket: "desc",
+        },
+      },
+      take: limit,
+    });
+
+    return topDrivers.map((driver) => {
+      const driverInfo = drivers.find((d) => d.id_user === driver.driver_id);
+
+      return {
+        driver_id: driver.driver_id,
+        fname: driverInfo?.f_name ?? "Unknown",
+        lname: driverInfo?.l_name ?? "Unknown",
+        tickets_sold: driver._count.id_ticket,
+        photos: driverInfo?.photo ?? null,
+      };
+    });
+  }
+
   async getTicketByDriver(userId: number) {
     const today = new Date();
 

@@ -1,5 +1,6 @@
 package com.orion.madatransit.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -12,12 +13,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.orion.madatransit.model.BusStop
 import com.orion.madatransit.model.BusStopInfo
+import com.orion.madatransit.R
 
 @Composable
 fun BusStopRowItem(stop: BusStop, onClick: () -> Unit) {
@@ -33,11 +37,19 @@ fun BusStopRowItem(stop: BusStop, onClick: () -> Unit) {
             Box(
                 modifier = Modifier
                     .size(36.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFF5E17EB)),
+                    .clip(CircleShape),
+//                    .background(Color(0xFF5E17EB)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.Place, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+                Image(
+                    painter = painterResource(
+                        id = R.drawable.bus_station
+                    ),
+                    contentDescription = "Bus stop",
+                    modifier = Modifier.size(20.dp),
+                    colorFilter = ColorFilter.tint(Color.Black)
+                )
+//                Icon(Icons.Default.Place, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
             }
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {

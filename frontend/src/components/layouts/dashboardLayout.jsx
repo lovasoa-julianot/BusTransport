@@ -6,11 +6,13 @@ import Navbar from "../Navbar";
 export default function DashboardLayout({ user, handleLogout }) {
   return (
     <div className="min-h-screen bg-[#D9D9D9]">
-      <Topbar user={user} handleLogout={handleLogout}/>
+      <div className="flex flex-col fixed w-full z-50">
+        <Topbar user={user} handleLogout={handleLogout} />
 
-      <Navbar />
+        <Navbar />
+      </div>
 
-      <main className="max-w-9xl mx-auto px-40 py-8">
+      <main className="max-w-9xl mx-auto px-40 py-35">
         <Outlet />
       </main>
     </div>

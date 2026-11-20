@@ -11,7 +11,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 
 object RetrofitClient {
     private const val BASE_URL =
-        "https://varying-jul-doe-cargo.trycloudflare.com"
+        "http://10.107.151.138:5000/api/"
 
     fun getBaseURL() : String {
         return BASE_URL
@@ -36,7 +36,6 @@ object RetrofitClient {
             requestBuilder.header("Authorization", "Bearer $cleanToken")
             requestBuilder.addHeader("Cookie", "access_token=$cleanToken")
         }
-
         chain.proceed(requestBuilder.build())
     }
 

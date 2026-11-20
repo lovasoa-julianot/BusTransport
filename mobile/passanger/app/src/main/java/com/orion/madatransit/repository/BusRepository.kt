@@ -33,7 +33,8 @@ class BusRepository(private val apiService: ApiService) {
                     ),
                     distance = "Calcul...",
                     availableLines = stopLinesMap[dto.id]?.distinct()?.joinToString(", ") ?: "Aucune ligne",
-                    distanceColor = Color(0xFF00C853)
+                    distanceColor = Color(0xFF00C853),
+
                 )
             }
         } catch (e: Exception) {
@@ -53,6 +54,14 @@ class BusRepository(private val apiService: ApiService) {
         } catch (e: Exception) {
             e.printStackTrace()
             emptyMap()
+        }
+    }
+
+    suspend fun getLines(): List<com.orion.madatransit.api.BusLineDto> {
+        return try {
+            apiService.getLines().data
+        } catch (e: Exception) {
+            emptyList()
         }
     }
 }

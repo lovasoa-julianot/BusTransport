@@ -12,25 +12,32 @@ router.post(
   incomeController.create,
 );
 
-// router.get(
-//   "/income",
-//   verifyToken,
-//   requireRole("Admin"),
-//   incomeController.getAll,
-// );
+router.get(
+  "/income/all",
+  verifyToken,
+  requireRole("Admin"),
+  incomeController.getAll,
+);
 
 router.get(
-  "/income/:id",
+  "/income",
   // verifyToken,
   // requireRole("Admin"),
   incomeController.filterByDate,
 );
 
 router.get(
-  "/income/:id",
-  verifyToken,
-  requireRole("Admin"),
-  incomeController.getIncomeByBus,
+  "/income/total",
+  // verifyToken,
+  // requireRole("Admin"),
+  incomeController.getTotalIncome,
+);
+
+router.get(
+  "/income/driver/:id",
+  // verifyToken,
+  // requireRole("Admin"),
+  incomeController.getIncomeByDriver,
 );
 
 export default router;

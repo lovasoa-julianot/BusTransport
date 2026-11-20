@@ -1,5 +1,6 @@
 package com.orion.bustransport.screen
 
+import android.app.Activity
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -11,11 +12,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
-//import androidx.compose.material.icons.filled.DirectionsBus
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
-//import androidx.compose.material.icons.filled.Visibility
-//import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.orion.bustransport.R
 import com.orion.bustransport.viewModel.LoginViewModel
+import com.orion.bustransport.components.ErrorSplashScreen
 
 @Composable
 fun LoginScreen(
@@ -49,6 +48,15 @@ fun LoginScreen(
 
     val isLoading = viewModel.isLoading
     val error = viewModel.errorMessage
+    val isFatalError = viewModel.isFatalError
+
+    if (isFatalError) {
+        ErrorSplashScreen(
+            errorMessage = error ?: "Impossible de contacter le serveur. L'application va se fermer.",
+            onExit = { (context as? Activity)?.finish() }
+        )
+        return
+    }
 
     // Palette de couleurs épurée
     val appBackground = Color.White // Arrière-plan principal blanc pour un look natif et propre

@@ -125,3 +125,9 @@ code {
     break-inside: avoid;
   }
 }
+
+@media screen {
+  .print-container {
+    display: none;
+  }
+}
